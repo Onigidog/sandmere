@@ -137,6 +137,9 @@ a.chip:hover{border-color:var(--ink);color:var(--ink)}
 .hero .titlebox .cells{display:grid;grid-template-columns:auto;border-left:1px solid var(--red);font-family:var(--mono);font-size:12px;letter-spacing:.08em}
 .hero .titlebox .cells span{padding:10px 18px;border-right:1px solid var(--red);display:flex;align-items:center}
 .hero .titlebox .cells span:last-child{border-right:none}
+.hero h1 span{display:inline-block;transform:skewX(-11deg)}
+.hero h1 span:nth-child(odd){transform:translateY(-.09em) skewX(-11deg)}
+.hero h1 span:nth-child(even){transform:translateY(.09em) skewX(-11deg)}
 .hero .tagline{font-family:var(--mono);font-style:italic;font-size:13px;color:var(--ink-dim);letter-spacing:.14em;text-transform:uppercase;margin:-12px 0 6px}
 .hero .intro{max-width:620px;color:var(--ink-dim);font-size:16px;margin-top:22px}
 .hero .intro p{margin:0 0 .4em}
@@ -354,6 +357,35 @@ dl.fields dd{color:var(--ink-dim)}
   nav.main::-webkit-scrollbar{display:none}
   nav.main a{padding:9px 12px 8px;white-space:nowrap}
 }
+/* 導覽分隔 */
+.nav-sep{width:1px;background:var(--rule);margin:12px 6px}
+nav.main a[data-n=""]::before{display:none}
+/* 畫冊 */
+.gal-filter{display:flex;flex-wrap:wrap;gap:0;margin:-8px 0 24px;border-bottom:1px solid var(--line)}
+.gal-filter button{background:none;border:none;padding:6px 14px 8px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;color:var(--ink-dim);cursor:pointer;position:relative}
+.gal-filter button.on{color:var(--ink)}
+.gal-filter button.on::after{content:"";position:absolute;left:14px;right:14px;bottom:-1px;height:2px;background:var(--red)}
+.gal{columns:3 280px;column-gap:26px}
+.gal-item{break-inside:avoid;margin:0 0 30px;position:relative}
+.gal-item .edit-row{position:absolute;top:8px;right:8px;z-index:2}
+.gal-item .edit-row .btn{background:var(--paper)}
+.gal-item:hover .edit-row{opacity:1}
+.gal-img{border:1px solid var(--rule);background:var(--paper3);cursor:zoom-in;line-height:0;overflow:hidden}
+.gal-img img{width:100%;height:auto;display:block;transition:transform .5s ease}
+.gal-img:hover img{transform:scale(1.025)}
+.gal-item figcaption{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:7px 0 0;border-bottom:1px solid var(--line);padding-bottom:6px}
+.gal-art{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;color:var(--mute);text-transform:uppercase;white-space:nowrap}
+.gal-art b{font-weight:500;color:var(--ink);margin-left:2px;text-transform:none;letter-spacing:.06em}
+.gal-title{font-size:12.5px;color:var(--ink-dim);text-align:right;line-height:1.5}
+.modal.wide{max-width:1100px;padding:18px 20px}
+.lb-img{background:var(--paper3);border:1px solid var(--rule);text-align:center;line-height:0}
+.lb-img img{max-width:100%;max-height:74vh;object-fit:contain}
+.lb-cap{padding:10px 0 4px}
+.lb-cap>div:first-child{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.lb-meta{font-family:var(--mono);font-size:11px;color:var(--mute);letter-spacing:.1em;margin-top:4px}
+.lb-nav{display:flex;justify-content:space-between;align-items:center;gap:8px;border-top:1px solid var(--rule);padding-top:10px;margin-top:8px}
+.lb-nav button[disabled]{opacity:.25;cursor:default}
+@media (max-width:700px){.nav-sep{margin:10px 4px}}
 .mrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:7px 18px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;z-index:60;opacity:0;transition:.25s;pointer-events:none}
 .toast.on{opacity:1}
@@ -379,7 +411,9 @@ footer{max-width:1140px;width:calc(100% - 40px);margin:0 auto;padding:18px 0 40p
       <a data-go="lore" data-n="01">設定</a>
       <a data-go="stories" data-n="02">故事</a>
       <a data-go="paro" data-n="03">PARO</a>
-      <a data-go="comm" data-n="04">委託</a>
+      <a data-go="gallery" data-n="04">畫冊</a>
+      <span class="nav-sep" aria-hidden="true"></span>
+      <a data-go="comm" data-n="">委託</a>
     </nav>
     <div class="auth" id="auth"></div>
   </div>
@@ -406,9 +440,9 @@ async function loadConfig(){
   }catch(e){ console.info('config.js 未載入，使用預覽模式'); }
 }
 
-const COLS = ['chars','events','lore','stories','paros','sheets','comms','tlconf'];
+const COLS = ['chars','events','lore','stories','paros','sheets','comms','tlconf','gallery'];
 const LS_KEY = 'hippocampus-site-v1';
-const DB = { meta:{}, chars:[], events:[], lore:[], stories:[], paros:[], sheets:[], comms:[], tlconf:[] };
+const DB = { meta:{}, chars:[], events:[], lore:[], stories:[], paros:[], sheets:[], comms:[], tlconf:[], gallery:[] };
 let store = null, user = null, mode = 'local', ready = false;
 const ui = { tab:{}, storyQ:'', storyScope:'', storyType:'', commTab:'sheets' };
 
@@ -480,7 +514,11 @@ function compressImage(file, max=900){
     fr.onload=()=>{ const im=new Image(); im.onload=()=>{
       const k=Math.min(1,max/Math.max(im.width,im.height)); const c=document.createElement('canvas');
       c.width=Math.round(im.width*k); c.height=Math.round(im.height*k);
-      c.getContext('2d').drawImage(im,0,0,c.width,c.height); res(c.toDataURL('image/jpeg',.82)); };
+      const g=c.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,c.width,c.height); g.drawImage(im,0,0,c.width,c.height);
+      let q=.85, out=c.toDataURL('image/jpeg',q);
+      while(out.length>880000 && q>.45){ q-=.08; out=c.toDataURL('image/jpeg',q); }
+      if(out.length>880000){ const c2=document.createElement('canvas'); c2.width=Math.round(c.width*.75); c2.height=Math.round(c.height*.75); const g2=c2.getContext('2d'); g2.fillStyle='#fff'; g2.fillRect(0,0,c2.width,c2.height); g2.drawImage(c,0,0,c2.width,c2.height); out=c2.toDataURL('image/jpeg',.7); }
+      res(out); };
       im.onerror=rej; im.src=fr.result; };
     fr.onerror=rej; fr.readAsDataURL(file);
   });
@@ -542,6 +580,13 @@ const SCHEMA = {
     {k:'refs',l:'參考圖連結',t:'textarea',hint:'一行一個網址'},
     {k:'order',l:'排序',t:'number'},
   ]},
+  gallery: { title:'畫冊作品', fields:[
+    {k:'image',l:'圖片',t:'image',req:1},
+    {k:'artist',l:'作者（顯示為 ART. ___）',req:1,half:1},{k:'title',l:'作品名稱（可留空）',half:1},
+    {k:'date',l:'日期',t:'date',half:1},{k:'link',l:'作者頁面／原圖連結',t:'url',half:1},
+    {k:'chars',l:'角色',t:'chars'},
+    {k:'note',l:'備註（可留空）',t:'textarea'},
+  ]},
   comms: { title:'委託紀錄', fields:[
     {k:'title',l:'委託名稱',req:1},
     {k:'artist',l:'繪師／寫手',half:1},{k:'status',l:'狀態',t:'select',opts:COMM_STATUS,half:1},
@@ -561,7 +606,7 @@ function openModal(html, cls=''){
   return $('#modalRoot .modal');
 }
 function closeModal(){ $('#modalRoot').innerHTML=''; }
-document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); if(document.querySelector('.lb')){ const b=document.querySelector(e.key==='ArrowLeft'?'.lb-nav [data-lb]:first-child':e.key==='ArrowRight'?'.lb-nav [data-lb]:last-child':null); if(b&&b.dataset.lb) openGalleryItem(b.dataset.lb); } });
 
 function askConfirm(msg){
   return new Promise(res=>{
@@ -607,7 +652,7 @@ function openEditor(col, item, preset={}){
       hint: f.k==='ageB' ? (cf.gap!==''&&cf.gap!=null ? `留空會自動算（${cf.nameA} ${Number(cf.gap)>=0?'+':''}${cf.gap}）` : '') : f.hint }))};
   }
   if(isNew && col==='stories' && !obj.date) obj.date=today();
-  if(isNew && col==='comms' && !obj.date) obj.date=today();
+  if(isNew && (col==='comms'||col==='gallery') && !obj.date) obj.date=today();
   if(isNew && col==='paros' && (obj.order===undefined||obj.order==='')) obj.order=DB.paros.reduce((mx,p)=>Math.max(mx,Number(p.order)||0),0)+1;
   if(isNew && !obj.scope && sch.fields.some(f=>f.t==='scope')) obj.scope='main';
   const imgData={};
@@ -626,7 +671,7 @@ function openEditor(col, item, preset={}){
   }));
   m.querySelectorAll('[data-up]').forEach(inp=>inp.addEventListener('change',async()=>{
     const file=inp.files[0]; if(!file) return; const k=inp.dataset.up.slice(2);
-    try{ imgData[k]=await compressImage(file); const t=m.querySelector('#'+inp.dataset.up); t.value=''; t.placeholder='（已上傳圖片）'; toast('圖片已載入'); }catch{ toast('圖片讀取失敗'); }
+    try{ imgData[k]=await compressImage(file, col==='gallery'?1600:900); const t=m.querySelector('#'+inp.dataset.up); t.value=''; t.placeholder='（已上傳圖片）'; toast('圖片已載入'); }catch{ toast('圖片讀取失敗'); }
   }));
   m.querySelectorAll('[data-clr]').forEach(b=>b.addEventListener('click',()=>{ const k=b.dataset.clr.slice(2); delete imgData[k]; const t=m.querySelector('#'+b.dataset.clr); t.value=''; t.placeholder='貼上圖片網址，或按右邊上傳'; imgData[k]=null; }));
   m.querySelector('[data-cancel]').onclick=closeModal;
@@ -692,7 +737,7 @@ function viewHome(){
   <section class="hero">
     <div class="hero-side"><div>Holloy Academy</div><div>Alt. 21st c. England</div><div>Record No. ${String(DB.stories.length).padStart(3,'0')}</div></div>
     <div class="hero-main">
-      <div class="titlebox"><h1>${esc(m.title||'沙蟲海珀')}</h1>
+      <div class="titlebox"><h1 aria-label="${esc(m.title||'沙蟲海珀')}">${[...(m.title||'沙蟲海珀')].map(ch=>`<span>${esc(ch)}</span>`).join('')}</h1>
         <div class="cells"><span title="最後更新">${esc(lastUpdated())}</span></div></div>
       ${(m.titleEn??'Desert Worm, Drowned Amber')?`<div class="tagline">${esc(m.titleEn??'Desert Worm, Drowned Amber')}</div>`:''}
       ${m.intro?`<div class="intro prose">${md(m.intro)}</div>`:''}
@@ -1039,9 +1084,46 @@ function viewParo(id){
 }
 
 /* ----- 委託 ----- */
+/* ----- 畫冊 ----- */
+function viewGallery(){
+  const all=DB.gallery.slice().sort(byDateDesc);
+  const used=[...new Set(all.flatMap(g=>g.chars||[]))].filter(id=>charName(id));
+  const f=ui.galChar||'';
+  const list=f? all.filter(g=>(g.chars||[]).includes(f)) : all;
+  return pageHead('04','畫冊','Gallery', addBtn('gallery','新增作品')) +
+    (used.length?`<div class="gal-filter"><button class="${!f?'on':''}" data-galchar="">ALL</button>${used.map(id=>`<button class="${f===id?'on':''}" data-galchar="${id}">${esc(charName(id))}</button>`).join('')}</div>`:'') +
+    (list.length?`<div class="gal">${list.map(g=>`
+      <figure class="gal-item">
+        ${canEdit()?`<div class="edit-row"><button class="btn sm" data-edit="gallery:${g.id}">編輯</button></div>`:''}
+        <div class="gal-img" data-gal="${g.id}">${g.image?`<img src="${esc(g.image)}" alt="${esc(g.title||'')}" loading="lazy">`:''}</div>
+        <figcaption><span class="gal-art">ART.<b>${esc(g.artist||'—')}</b></span>${g.title?`<span class="gal-title">${esc(g.title)}</span>`:''}</figcaption>
+      </figure>`).join('')}</div>`
+    : emptyBox(DB.gallery.length?'這個角色還沒有作品':'畫冊還是空的', addBtn('gallery','新增作品')));
+}
+function openGalleryItem(id){
+  const g=DB.gallery.find(x=>x.id===id); if(!g) return;
+  const list=DB.gallery.slice().sort(byDateDesc).filter(x=>!ui.galChar||(x.chars||[]).includes(ui.galChar));
+  const i=list.findIndex(x=>x.id===id), prev=list[i-1], next=list[i+1];
+  const m=openModal(`<div class="lb">
+      <div class="lb-img">${g.image?`<img src="${esc(g.image)}" alt="">`:''}</div>
+      <div class="lb-cap">
+        <div><span class="gal-art">ART.<b>${esc(g.artist||'—')}</b></span>${g.title?`<span class="gal-title">${esc(g.title)}</span>`:''}</div>
+        <div class="lb-meta">${g.date?esc(g.date.replace(/-/g,'.')):''}${(g.chars||[]).length?'　'+charChips(g.chars):''}</div>
+        ${g.note?`<div class="small" style="color:var(--ink-dim);margin-top:6px;white-space:pre-wrap">${esc(g.note)}</div>`:''}
+      </div>
+      <div class="lb-nav">
+        <button class="btn sm ghost" data-lb="${prev?prev.id:''}" ${prev?'':'disabled'}>← PREV</button>
+        <span>${g.link?`<a href="${esc(g.link)}" target="_blank" rel="noopener" class="btn sm">作者頁面 ↗</a> `:''}<button class="btn sm ghost" data-x>關閉</button></span>
+        <button class="btn sm ghost" data-lb="${next?next.id:''}" ${next?'':'disabled'}>NEXT →</button>
+      </div></div>`,'wide');
+  m.querySelector('[data-x]').onclick=closeModal;
+  m.querySelectorAll('[data-lb]').forEach(b=>b.onclick=()=>{ if(b.dataset.lb) openGalleryItem(b.dataset.lb); });
+  m.querySelectorAll('[data-go]').forEach(a=>a.addEventListener('click',closeModal));
+}
+
 function viewComm(){
   const t=ui.commTab;
-  const head = pageHead('04','委託設定','Commissions');
+  const head = pageHead('※','委託設定','Commissions');
   const tabs = `<div class="tabs" id="commTabs"><button data-ct="sheets" class="${t==='sheets'?'on':''}">委託用設定</button><button data-ct="log" class="${t==='log'?'on':''}">委託紀錄</button></div>`;
   if(t==='sheets'){
     const ss=DB.sheets.slice().sort(byOrder);
@@ -1216,6 +1298,7 @@ function render(){
     case 'story': html=viewStory(id); break;
     case 'paro': html= id? viewParo(id) : viewParos(); break;
     case 'comm': html=viewComm(); break;
+    case 'gallery': html=viewGallery(); break;
     default: html=viewHome();
   }
   $('#app').innerHTML = banner + html;
@@ -1257,6 +1340,8 @@ document.addEventListener('click',e=>{
   const tab=t.closest('.tabs[data-scope] button'); if(tab){ const sc=tab.parentElement.dataset.scope; ui.tab[sc]=tab.dataset.tab; tab.parentElement.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b===tab)); $('#scopeBody').innerHTML=scopeBody(sc,tab.dataset.tab); return; }
   if(t.closest('[data-paro-list]')){ openParoList(); return; }
   const pl=t.closest('[data-pklang]'); if(pl){ ui.pkLang=pl.dataset.pklang; const y=window.scrollY; render(); window.scrollTo({top:y}); return; }
+  const gi=t.closest('[data-gal]'); if(gi){ openGalleryItem(gi.dataset.gal); return; }
+  const gc=t.closest('[data-galchar]'); if(gc){ ui.galChar=gc.dataset.galchar; render(); return; }
   const ct=t.closest('[data-ct]'); if(ct){ ui.commTab=ct.dataset.ct; render(); return; }
   const g=t.closest('[data-go]'); if(g && !t.closest('a[href]')){ e.preventDefault(); go(g.dataset.go); window.scrollTo({top:0}); }
 });
@@ -1305,7 +1390,7 @@ function seed(){
        summary:'達魯拿到能悄悄打開他人夢境的鑰匙，進入丹德里提的夢——以為是夢，眼前先出現的卻是一個套娃。',
        link:'', content:'## 大綱\n- 達魯拿到鑰匙打算進入夢境 → 以為是夢，結果眼前先出現的是個套娃\n- 丹德知道自己是人造人，潛意識可能暴露秘密——有風險，但能用「只是夢」帶過；入侵夢境有發瘋的風險；他自己不會想到，但直接拒絕又很奇怪；鑰匙會悄悄打開別人的夢，對他來說防不勝防\n\n## 海馬迴與套娃\n俄羅斯娃娃一層層打開：人造人 → 腦中的海馬迴 → 人類胚胎 → 餐盤 → 胚胎 → 圓體 → 肉體組織\n\n> 海馬迴形似海馬；蜷曲的人魚、抱膝的胚胎，也都像海馬迴。\n\n## 意象\n- 紅色的海、藍綠色的血管／青筋\n- 海底的骨頭＝歷代死去的意識；骨頭變成的套娃（？）\n- 一顆被放進達魯腦中的蛋（驚魂夜前置？）\n\n## 參考\n靈薄獄、清醒夢、所羅門的小鑰匙'},
     ],
-    paros:[], sheets:[], comms:[],
+    paros:[], sheets:[], comms:[], gallery:[],
   };
 }
 function initLocal(){
