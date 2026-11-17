@@ -134,7 +134,7 @@ a.chip:hover{border-color:var(--ink);color:var(--ink)}
 .hero .list{font-family:var(--mono);font-size:13px;line-height:1.75;letter-spacing:.04em;max-width:640px;color:var(--ink)}
 .hero .titlebox{display:grid;grid-template-columns:1fr auto;margin:24px -40px 28px -40px;border-top:1px solid var(--red);border-bottom:1px solid var(--red)}
 .hero h1{font-family:var(--sans);font-weight:900;letter-spacing:.12em;font-size:clamp(34px,6.4vw,68px);margin:0;padding:6px 40px 4px;line-height:1.05;margin-top:-.45em;background:transparent}
-.hero .titlebox .cells{display:grid;grid-template-columns:auto auto;border-left:1px solid var(--red);font-family:var(--mono);font-size:12px;letter-spacing:.08em}
+.hero .titlebox .cells{display:grid;grid-template-columns:auto;border-left:1px solid var(--red);font-family:var(--mono);font-size:12px;letter-spacing:.08em}
 .hero .titlebox .cells span{padding:10px 18px;border-right:1px solid var(--red);display:flex;align-items:center}
 .hero .titlebox .cells span:last-child{border-right:none}
 .hero .tagline{font-family:var(--mono);font-style:italic;font-size:13px;color:var(--ink-dim);letter-spacing:.14em;text-transform:uppercase;margin:-12px 0 6px}
@@ -220,6 +220,17 @@ dl.fields dd{color:var(--ink-dim)}
 .paro-card .cover::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--accent,var(--red))}
 .paro-card .cover img{width:100%;height:100%;object-fit:cover;filter:grayscale(.3)}
 .paro-card .body{padding:12px 16px 16px}
+.paro-card .sum{font-size:13px;line-height:1.7;margin-top:6px}
+.sortlist{list-style:none;margin:0 0 4px;padding:0;border-top:1px solid var(--rule)}
+.sortlist li{display:grid;grid-template-columns:26px 34px 1fr auto;align-items:center;gap:8px;padding:11px 6px;border-bottom:1px solid var(--line);background:var(--paper2);user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.sortlist.can li{touch-action:none;cursor:grab}
+.sortlist li .grip{color:var(--mute);font-family:var(--mono);letter-spacing:-2px;text-align:center}
+.sortlist li .idx{font-family:var(--mono);font-size:12px;color:var(--red)}
+.sortlist li b{font-family:var(--sans);font-weight:700;letter-spacing:.04em}
+.sortlist li .en{font-family:var(--mono);font-size:11px;color:var(--mute);margin-left:10px}
+.sortlist li.pressing{background:var(--paper3)}
+.sortlist li.dragging{background:var(--paper);outline:1px solid var(--ink);box-shadow:0 8px 20px rgba(27,27,25,.18);position:relative;z-index:2;cursor:grabbing}
+.sortlist li.dragging .grip{color:var(--red)}
 .paro-head{padding:26px 30px 26px 34px;margin-bottom:28px;background:var(--paper2);border:1px solid var(--rule);position:relative}
 .paro-head::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--accent,var(--red))}
 .paro-head h1{margin:4px 0 0;font-family:var(--sans);font-size:32px;letter-spacing:.04em;font-weight:900}
@@ -558,6 +569,7 @@ function openEditor(col, item, preset={}){
   }
   if(isNew && col==='stories' && !obj.date) obj.date=today();
   if(isNew && col==='comms' && !obj.date) obj.date=today();
+  if(isNew && col==='paros' && (obj.order===undefined||obj.order==='')) obj.order=DB.paros.reduce((mx,p)=>Math.max(mx,Number(p.order)||0),0)+1;
   if(isNew && !obj.scope && sch.fields.some(f=>f.t==='scope')) obj.scope='main';
   const imgData={};
   sch.fields.filter(f=>f.t==='image').forEach(f=>{ if(String(obj[f.k]||'').startsWith('data:')) imgData[f.k]=obj[f.k]; });
@@ -617,6 +629,13 @@ function storyRow(s){
 }
 function charChips(ids){ return (ids||[]).map(id=>{ const n=charName(id); return n?`<a class="chip vein" data-go="char-${id}">${esc(n)}</a>`:''; }).join(''); }
 
+/* 最後更新日：所有資料中最新的 updatedAt */
+function lastUpdated(){
+  let t=Number(DB.meta.updatedAt)||0;
+  COLS.forEach(c=>(DB[c]||[]).forEach(o=>{ const u=Number(o.updatedAt)||0; if(u>t) t=u; }));
+  const d=t? new Date(t) : new Date();
+  return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+}
 /* ----- 首頁 ----- */
 function viewHome(){
   const m=DB.meta;
@@ -629,10 +648,9 @@ function viewHome(){
     <div class="hero-side"><div>Holloy Academy</div><div>Alt. 21st c. England</div><div>Record No. ${String(DB.stories.length).padStart(3,'0')}</div></div>
     <div class="hero-main">
       <div class="titlebox"><h1>${esc(m.title||'沙蟲海珀')}</h1>
-        <div class="cells"><span>${esc(m.subtitle||'達魯 & 丹德里提')}</span><span>${esc(today().replace(/-/g,'.'))}</span></div></div>
+        <div class="cells"><span title="最後更新">${esc(lastUpdated())}</span></div></div>
       ${(m.titleEn??'Desert Worm, Drowned Amber')?`<div class="tagline">${esc(m.titleEn??'Desert Worm, Drowned Amber')}</div>`:''}
       ${m.intro?`<div class="intro prose">${md(m.intro)}</div>`:''}
-      ${canEdit()?`<div style="margin-top:18px"><button class="btn sm ghost" data-settings>✎ 編輯首頁與網站設定</button></div>`:''}
     </div>
   </section>
 
@@ -744,7 +762,7 @@ function openTlConf(scope){
   m.querySelector('[data-x]').onclick=closeModal;
   m.querySelector('#tc_s').onclick=async()=>{
     const g=$('#tc_g').value;
-    try{ await store.save('tlconf',{id:scope, heading:$('#tc_h').value.trim(), a:$('#tc_a').value, b:$('#tc_b').value, gap:g===''?'':Number(g)}); closeModal(); toast('已儲存'); }
+    try{ await store.save('tlconf',{id:scope, updatedAt:Date.now(), heading:$('#tc_h').value.trim(), a:$('#tc_a').value, b:$('#tc_b').value, gap:g===''?'':Number(g)}); closeModal(); toast('已儲存'); }
     catch(err){ toast('儲存失敗：'+(err.code||err.message)); }
   };
 }
@@ -837,7 +855,7 @@ function viewStory(id){
 /* ----- PARO ----- */
 function viewParos(){
   const ps=DB.paros.slice().sort(byOrder);
-  return pageHead('03','PARO 總覽','Parallel Worlds', addBtn('paros','新增 PARO')) +
+  return pageHead('03','PARO 總覽','Parallel Worlds', (ps.length?`<button class="btn" data-paro-list>☰ ${canEdit()?'條列／排序':'條列'}</button>`:'') + addBtn('paros','新增 PARO')) +
     (ps.length?`<div class="grid g3">${ps.map(p=>{
       const n={c:DB.chars.filter(x=>x.scope===p.id).length, s:DB.stories.filter(x=>x.scope===p.id).length};
       return `<div class="card paro-card" data-go="paro-${p.id}" style="--accent:${esc(p.color||'#ad3328')}">
@@ -847,6 +865,55 @@ function viewParos(){
         <div class="sum" style="margin-top:6px">${esc(p.summary||'')}</div>
         <div class="meta" style="margin:8px 0 0">${n.c} 位角色・${n.s} 篇故事</div></div></div>`; }).join('')}</div>`
     : emptyBox('還沒有建立任何 PARO', addBtn('paros','新增 PARO')));
+}
+function openParoList(){
+  const ps=DB.paros.slice().sort(byOrder), ed=canEdit();
+  const m=openModal(`<h2>PARO 條列</h2>
+    ${ed?`<p class="small muted" style="margin:-8px 0 14px">長按任一列（電腦可直接按住）上下拖曳來調整順序，完成後按「儲存排序」。</p>`:''}
+    <ol class="sortlist ${ed?'can':''}" id="sortList">${ps.map(p=>`
+      <li data-id="${p.id}"><span class="grip">${ed?'⋮⋮':''}</span><span class="idx"></span>
+        <span><b>${esc(p.name)}</b>${p.nameEn?`<span class="en">${esc(p.nameEn)}</span>`:''}</span>
+        <button class="btn sm ghost" data-open="${p.id}">→</button></li>`).join('')}</ol>
+    <div class="modal-foot"><span></span><div><button class="btn ghost" data-x>${ed?'取消':'關閉'}</button>${ed?' <button class="btn pri" id="sortSave">儲存排序</button>':''}</div></div>`,'sm');
+  const list=m.querySelector('#sortList');
+  const renum=()=>[...list.children].forEach((li,i)=>li.querySelector('.idx').textContent=String(i+1).padStart(2,'0'));
+  renum();
+  m.querySelector('[data-x]').onclick=closeModal;
+  list.addEventListener('click',e=>{ const o=e.target.closest('[data-open]'); if(o){ closeModal(); go('paro-'+o.dataset.open); window.scrollTo({top:0}); } });
+  if(!ed) return;
+  makeSortable(list, renum);
+  m.querySelector('#sortSave').onclick=async()=>{
+    const ids=[...list.children].map(li=>li.dataset.id); const now=Date.now();
+    try{
+      for(let i=0;i<ids.length;i++){ const p=DB.paros.find(x=>x.id===ids[i]); if(p && Number(p.order)!==i+1) await store.save('paros',{...p, order:i+1, updatedAt:now}); }
+      closeModal(); toast('已更新排序');
+    }catch(err){ toast('儲存失敗：'+(err.code||err.message)); }
+  };
+}
+function makeSortable(list, onChange){
+  let drag=null, pending=null, timer=null, startY=0;
+  const begin=(li,id)=>{ drag=li; li.classList.remove('pressing'); li.classList.add('dragging'); try{ navigator.vibrate&&navigator.vibrate(12); }catch{} };
+  const end=()=>{ clearTimeout(timer); timer=null; if(pending){ pending.classList.remove('pressing'); pending=null; } if(drag){ drag.classList.remove('dragging'); drag=null; onChange&&onChange(); } };
+  list.addEventListener('pointerdown',e=>{
+    if(e.target.closest('button')) return;
+    const li=e.target.closest('li'); if(!li) return;
+    startY=e.clientY; pending=li; li.classList.add('pressing');
+    if(e.pointerType==='mouse'){ e.preventDefault(); begin(li,e.pointerId); pending=null; }
+    else timer=setTimeout(()=>{ if(pending===li){ pending=null; begin(li,e.pointerId); } },260);
+  });
+  const move=e=>{
+    if(!drag){ if(pending && Math.abs(e.clientY-startY)>10){ clearTimeout(timer); pending.classList.remove('pressing'); pending=null; } return; }
+    e.preventDefault();
+    const sibs=[...list.children].filter(x=>x!==drag);
+    const after=sibs.find(x=>{ const r=x.getBoundingClientRect(); return e.clientY < r.top + r.height/2; });
+    if(after){ if(drag.nextSibling!==after) list.insertBefore(drag,after); } else if(list.lastElementChild!==drag) list.appendChild(drag);
+    onChange&&onChange();
+  };
+  window.addEventListener('pointermove',move,{passive:false});
+  window.addEventListener('pointerup',end); window.addEventListener('pointercancel',end);
+  const mo=new MutationObserver(()=>{ if(!document.body.contains(list)){ window.removeEventListener('pointermove',move); window.removeEventListener('pointerup',end); window.removeEventListener('pointercancel',end); mo.disconnect(); } });
+  mo.observe(document.body,{childList:true,subtree:true});
+  list.addEventListener('contextmenu',e=>e.preventDefault());
 }
 function viewParo(id){
   const p=DB.paros.find(x=>x.id===id);
@@ -911,7 +978,7 @@ function openSettings(){
     <div class="modal-foot"><span></span><div><button class="btn ghost" data-x>取消</button> <button class="btn pri" id="s_save">儲存</button></div></div>`);
   mm.querySelector('[data-x]').onclick=closeModal;
   mm.querySelector('#s_save').onclick=async()=>{
-    const nm={...DB.meta, title:$('#s_title').value.trim(), titleEn:$('#s_titleEn').value.trim(), subtitle:$('#s_sub').value.trim(), intro:$('#s_intro').value};
+    const nm={...DB.meta, updatedAt:Date.now(), title:$('#s_title').value.trim(), titleEn:$('#s_titleEn').value.trim(), subtitle:$('#s_sub').value.trim(), intro:$('#s_intro').value};
     try{ if(fb && !isOwner()){ toast('只有站主能改網站設定'); return; } await store.saveMeta(nm); closeModal(); toast('已儲存'); }catch(e){ toast('儲存失敗：'+(e.code||e.message)); }
   };
   mm.querySelector('#s_exp').onclick=()=>{
@@ -1044,7 +1111,7 @@ function render(){
   $('#app').innerHTML = banner + html;
   $('#brandName').textContent = DB.meta.title || '沙蟲海珀';
   document.title = (DB.meta.title||'沙蟲海珀') + ' · ' + (DB.meta.subtitle||'達魯 & 丹德里提');
-  $('#foot').innerHTML = `<span>${esc(DB.meta.title||'沙蟲海珀')} — ${esc(DB.meta.subtitle||'')}</span><span>Holloy Academy Archive</span>`;
+  $('#foot').innerHTML = `<span>${esc(DB.meta.title||'沙蟲海珀')}${DB.meta.subtitle?' — '+esc(DB.meta.subtitle):''}</span><span>Holloy Academy Archive</span>`;
   renderAuth();
 }
 let _raf=0; function schedule(){ cancelAnimationFrame(_raf); _raf=requestAnimationFrame(render); }
@@ -1078,6 +1145,7 @@ document.addEventListener('click',e=>{
   if(t.closest('[data-logout]')){ store.logout(); return; }
   const cp=t.closest('[data-copy]'); if(cp){ navigator.clipboard?.writeText(cp.dataset.copy).then(()=>toast('已複製 '+cp.dataset.copy)).catch(()=>toast(cp.dataset.copy)); return; }
   const tab=t.closest('.tabs[data-scope] button'); if(tab){ const sc=tab.parentElement.dataset.scope; ui.tab[sc]=tab.dataset.tab; tab.parentElement.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b===tab)); $('#scopeBody').innerHTML=scopeBody(sc,tab.dataset.tab); return; }
+  if(t.closest('[data-paro-list]')){ openParoList(); return; }
   const ct=t.closest('[data-ct]'); if(ct){ ui.commTab=ct.dataset.ct; render(); return; }
   const g=t.closest('[data-go]'); if(g && !t.closest('a[href]')){ e.preventDefault(); go(g.dataset.go); window.scrollTo({top:0}); }
 });
