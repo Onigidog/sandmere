@@ -317,6 +317,43 @@ dl.fields dd{color:var(--ink-dim)}
 .tl2-desc{border-top:1px dashed var(--line);padding:10px 0 4px;font-size:14.5px;color:var(--ink-dim);text-align:center}
 .tl2-chars{padding:4px 0 6px}
 @media (max-width:700px){.tl2-item{grid-template-columns:52px 1fr;gap:0 14px}.tl2-num span{font-size:34px}.tl2-legend{margin-left:0}.tl2-title{padding:8px 26px;font-size:18px}.tl2-c{padding-right:12px}.tl2-c.b{padding-left:12px}}
+/* 噗文排版 */
+.pk{margin:22px 0 10px}
+.pk-lang{display:flex;justify-content:flex-end;margin-bottom:10px}
+.pk-lang button{background:none;border:1px solid var(--line);border-left:none;font-family:var(--mono);font-size:11px;letter-spacing:.1em;padding:3px 12px;cursor:pointer;color:var(--ink-dim)}
+.pk-lang button:first-child{border-left:1px solid var(--line)}
+.pk-lang button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.pk-main{border:1px solid var(--rule);background:var(--paper2);padding:20px 24px 14px;position:relative}
+.pk-main::before{content:"";position:absolute;left:-1px;top:-1px;bottom:-1px;width:4px;background:var(--red)}
+.pk-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--mute);border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:14px}
+.pk-main .pk-who{font-size:15px;margin:0}
+.pk-body{font-size:17px;line-height:2}
+.pk-body p{margin:0 0 1em}
+.pk-foot{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--mute);border-top:1px solid var(--line);padding-top:8px;margin-top:6px}
+.pk-foot a{color:var(--red)}
+.pk-res{list-style:none;margin:18px 0 0;padding:0;border-top:3px solid var(--ink)}
+.pk-res li{display:grid;grid-template-columns:62px 1fr;gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}
+.pk-fl{font-family:var(--mono);font-size:11px;color:var(--mute);letter-spacing:.04em;padding-top:5px}
+.pk-who{font-family:var(--sans);font-weight:700;font-size:13px;letter-spacing:.08em;color:var(--red);margin-bottom:6px}
+.pk-txt{font-size:16.5px;line-height:1.95}
+.pk-txt p{margin:0 0 .8em}
+.pk-txt p:last-child,.pk-body p:last-child{margin-bottom:0}
+.pk-ja{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);color:var(--ink-dim);font-size:15px}
+.pk-ja p{margin:0 0 .7em}
+.pk-res li.pk-orn{color:var(--line);font-family:var(--mono);letter-spacing:.3em;padding:10px 0}
+.pk-res li.pk-orn>span:last-child{text-align:center;padding-right:62px}
+.pk-res li.pk-div{padding:6px 0}
+.pk-res li.pk-div>span:last-child{border-top:1px solid var(--ink);align-self:center;width:40px}
+.pk-res li.pk-music div{font-family:var(--mono);font-size:12.5px;letter-spacing:.04em;color:var(--sage);padding-top:3px}
+@media (max-width:600px){.pk-res li{grid-template-columns:44px 1fr;gap:10px}.pk-main{padding:16px 16px 12px}.pk-res li.pk-orn>span:last-child{padding-right:44px}}
+@media (max-width:700px){
+  .top-inner{padding:0 14px}
+  .brand{border-right:none;padding:10px 0;margin:0;flex:1}
+  .auth{order:2}
+  nav.main{order:3;flex:none;width:100%;flex-wrap:nowrap;overflow-x:auto;border-top:1px solid var(--line);scrollbar-width:none}
+  nav.main::-webkit-scrollbar{display:none}
+  nav.main a{padding:9px 12px 8px;white-space:nowrap}
+}
 .mrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:7px 18px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;z-index:60;opacity:0;transition:.25s;pointer-events:none}
 .toast.on{opacity:1}
@@ -485,6 +522,7 @@ const SCHEMA = {
     {k:'chars',l:'登場角色',t:'chars'},
     {k:'summary',l:'摘要',t:'textarea'},
     {k:'link',l:'原文連結（噗浪等，可留空）',t:'url'},
+    {k:'thread',l:'噗文 JSON（可留空）',t:'json',hint:'貼上或上傳噗浪截圖工具匯出的 JSON（plurk-snap），會自動用噗文排版顯示；有它時正文可以留空'},
     {k:'tags',l:'標籤',hint:'用逗號分隔'},
     {k:'content',l:'正文',t:'md',tall:1},
   ]},
@@ -545,6 +583,7 @@ function fieldHTML(f, v){
     case 'color': input=`<input type="text" id="${id}" value="${esc(val||'#ad3328')}" placeholder="#ad3328">`; break;
     case 'select': input=`<select id="${id}">${f.opts.map(o=>`<option ${o===val?'selected':''}>${esc(o)}</option>`).join('')}</select>`; break;
     case 'scope': input=`<select id="${id}">${scopeOptions().map(([k,n])=>`<option value="${k}" ${k===(val||'main')?'selected':''}>${esc(n)}</option>`).join('')}</select>`; break;
+    case 'json': input=`<textarea id="${id}" style="min-height:90px;font-family:var(--mono);font-size:12px" placeholder='{"format":"plurk-snap/1", ...}'>${val?esc(JSON.stringify(val)):''}</textarea><div style="margin-top:6px"><label class="btn sm" style="margin:0">上傳 .json<input type="file" accept=".json,application/json" hidden data-jsonup="${id}"></label>${val&&val.items?` <span class="muted small">目前 ${val.items.length} 樓</span>`:''}</div>`; break;
     case 'storySelect': input=`<select id="${id}"><option value="">（不連結）</option>${DB.stories.slice().sort(byDateDesc).map(x=>`<option value="${x.id}" ${x.id===val?'selected':''}>${esc(x.title)}</option>`).join('')}</select>`; break;
     case 'charSelect': input=`<select id="${id}"><option value="">（無）</option>${DB.chars.slice().sort(byOrder).map(c=>`<option value="${c.id}" ${c.id===val?'selected':''}>${esc(c.name)}（${esc(scopeName(c.scope))}）</option>`).join('')}</select>`; break;
     case 'chars': {
@@ -581,6 +620,10 @@ function openEditor(col, item, preset={}){
   const m=openModal(`<h2>${isNew?'新增':'編輯'}${sch.title}</h2><form id="edForm">${html}
     <div class="modal-foot"><div>${!isNew?'<button type="button" class="btn danger" data-del>刪除</button>':''}</div>
     <div><button type="button" class="btn ghost" data-cancel>取消</button> <button class="btn pri" type="submit">儲存</button></div></div></form>`);
+  m.querySelectorAll('[data-jsonup]').forEach(inp=>inp.addEventListener('change',()=>{
+    const f=inp.files[0]; if(!f) return; const r=new FileReader();
+    r.onload=()=>{ m.querySelector('#'+inp.dataset.jsonup).value=r.result; toast('已載入 '+f.name); }; r.readAsText(f);
+  }));
   m.querySelectorAll('[data-up]').forEach(inp=>inp.addEventListener('change',async()=>{
     const file=inp.files[0]; if(!file) return; const k=inp.dataset.up.slice(2);
     try{ imgData[k]=await compressImage(file); const t=m.querySelector('#'+inp.dataset.up); t.value=''; t.placeholder='（已上傳圖片）'; toast('圖片已載入'); }catch{ toast('圖片讀取失敗'); }
@@ -593,6 +636,8 @@ function openEditor(col, item, preset={}){
     e.preventDefault();
     for(const f of sch.fields){
       const el=m.querySelector('#f_'+f.k);
+      if(f.t==='json'){ const v=el.value.trim(); if(!v){ obj[f.k]=null; continue; }
+        try{ const j=JSON.parse(v); if(!Array.isArray(j.items)) throw 0; obj[f.k]=j; }catch{ toast('噗文 JSON 格式不正確'); return; } continue; }
       if(f.t==='chars'){ obj[f.k]= el? [...el.querySelectorAll('input:checked')].map(x=>x.value) : []; continue; }
       if(f.t==='image'){ const typed=el.value.trim(); obj[f.k]= typed || (imgData[f.k]===null? '' : (imgData[f.k]||'')); continue; }
       if(!el) continue;
@@ -822,13 +867,77 @@ function storyCards(){
     </div>`).join('')}</div>`;
 }
 function viewStories(){
-  return pageHead('02','故事','Stories & Exchanges', addBtn('stories','新增故事')) + `
+  return pageHead('02','故事','Stories & Exchanges', (canEdit()?`<label class="btn" style="margin:0">⇪ 匯入噗文 JSON<input type="file" accept=".json,application/json" hidden data-plurkimport></label>`:'') + addBtn('stories','新增故事')) + `
   <div class="toolbar">
     <input id="sq" type="text" placeholder="搜尋標題、摘要、標籤、角色…" value="${esc(ui.storyQ)}">
     <select id="ss"><option value="">全部世界</option>${scopeOptions().map(([k,n])=>`<option value="${k}" ${ui.storyScope===k?'selected':''}>${esc(n)}</option>`).join('')}</select>
     <select id="st"><option value="">全部類型</option>${STORY_TYPES.map(t=>`<option ${ui.storyType===t?'selected':''}>${t}</option>`).join('')}</select>
   </div><div id="storyList">${storyCards()}</div>`;
 }
+/* ----- 噗文（plurk-snap JSON）排版 ----- */
+const MARK=/\[\[\d+\]\]/g;
+function pkClean(t){ return String(t||'').replace(MARK,'').replace(/^[ \t]*\*{2,}[ \t]*$/gm,'').replace(/[ \t　]+\n/g,'\n').replace(/\n[ \t　]+/g,'\n').replace(/\n{3,}/g,'\n\n').trim(); }
+function pkKind(raw){
+  const t=pkClean(raw);
+  if(!t) return 'img';
+  if(/^[-—–_]+$/.test(t)) return 'div';
+  if(/^\[\[\d+\]\][^\n\[]+$/.test(String(raw).trim()) && !/\n/.test(t)) return 'music';
+  return 'text';
+}
+function pkHTML(t){
+  return pkClean(t).split(/\n{2,}/).map(par=>`<p>${par.split('\n').map(x=>esc(x)).join('<br>')}</p>`).join('');
+}
+function pkSpeaker(th,name){ if(ui.pkLang!=='ja') return name; const sp=(th.speakers||[]).find(x=>x.zh===name); return (sp&&sp.ja)||name; }
+function pkText(it){
+  const lang=ui.pkLang||'zh';
+  if(lang==='ja' && it.ja) return pkHTML(it.ja);
+  if(lang==='both' && it.ja) return pkHTML(it.zh)+`<div class="pk-ja">${pkHTML(it.ja)}</div>`;
+  return pkHTML(it.zh);
+}
+function renderThread(th){
+  const items=(th.items||[]).slice().sort((a,b)=>(a.floor||0)-(b.floor||0));
+  const main=items.find(x=>x.floor===0||x.id==='main'); const res=items.filter(x=>x!==main);
+  const hasJa=items.some(x=>x.ja&&x.ja.trim());
+  const lang=ui.pkLang||'zh';
+  // 把連續的「只有圖片」樓層合併
+  const rows=[]; let prevSpk=main?main.speaker:'';
+  for(const it of res){
+    const k=pkKind(it.zh);
+    if(k==='img'){ const last=rows[rows.length-1]; if(last&&last.k==='img'){ last.to=it.floor; continue; } rows.push({k,from:it.floor,to:it.floor}); continue; }
+    rows.push({k,it,showName:it.speaker!==prevSpk}); prevSpk=it.speaker;
+  }
+  const fl=n=>'#'+n;
+  return `<section class="pk">
+    ${hasJa?`<div class="pk-lang">${[['zh','中文'],['ja','日本語'],['both','對照']].map(([k,n])=>`<button class="${lang===k?'on':''}" data-pklang="${k}">${n}</button>`).join('')}</div>`:''}
+    ${main?`<div class="pk-main">
+      <div class="pk-head"><span class="pk-who">${esc(pkSpeaker(th,main.speaker))}</span><span>PLURK ／ ${esc(th.plurk||'')}</span></div>
+      <div class="pk-body">${pkText(main)}</div>
+      <div class="pk-foot"><span>${res.length} RESPONSES</span>${th.url?`<a href="${esc(th.url)}" target="_blank" rel="noopener">原噗 ↗</a>`:''}</div>
+    </div>`:''}
+    <ol class="pk-res">${rows.map(r=>{
+      if(r.k==='img') return `<li class="pk-orn"><span class="pk-fl">${fl(r.from)}${r.to!==r.from?'–'+r.to:''}</span><span>◇　◇　◇</span></li>`;
+      const it=r.it;
+      if(r.k==='div') return `<li class="pk-div"><span class="pk-fl">${fl(it.floor)}</span><span></span></li>`;
+      if(r.k==='music') return `<li class="pk-music"><span class="pk-fl">${fl(it.floor)}</span><div>♪　${esc(pkClean(lang==='ja'&&it.ja?it.ja:it.zh))}</div></li>`;
+      return `<li><span class="pk-fl">${fl(it.floor)}</span><div>${r.showName?`<div class="pk-who">${esc(pkSpeaker(th,it.speaker))}</div>`:''}<div class="pk-txt">${pkText(it)}</div></div></li>`;
+    }).join('')}</ol>
+  </section>`;
+}
+function importPlurkFile(file){
+  const r=new FileReader();
+  r.onload=()=>{
+    let j; try{ j=JSON.parse(r.result); if(!Array.isArray(j.items)) throw 0; }catch{ toast('這不是噗文 JSON'); return; }
+    const main=j.items.find(x=>x.floor===0||x.id==='main')||j.items[0]||{};
+    const lines0=pkClean(main.zh).split('\n').map(x=>x.trim()).filter(x=>x && !/^\*+$/.test(x));
+    const title=(lines0[0]||'未命名噗文').slice(0,40);
+    const body=lines0.slice(1).join(' ')||lines0[0]||'';
+    const names=new Set(j.items.map(x=>x.speaker));
+    const chars=DB.chars.filter(c=>names.has(c.name)||[...names].some(n=>n&&n.includes(c.name))).map(c=>c.id);
+    openEditor('stories',null,{type:'交流', title, link:j.url||'', author:main.speaker||'', thread:j, summary:body.slice(0,120), chars});
+  };
+  r.readAsText(file);
+}
+
 function viewStory(id){
   const s=DB.stories.find(x=>x.id===id);
   if(!s) return emptyBox('找不到這篇故事');
@@ -842,9 +951,10 @@ function viewStory(id){
       <dl class="byline">${s.author?`<dt>Author</dt><dd>${esc(s.author)}</dd>`:''}${s.date?`<dt>Date</dt><dd>${esc(s.date)}</dd>`:''}</dl>
       <div class="chips">${charChips(s.chars)}${tagsOf(s.tags).map(t=>`<span class="chip">#${esc(t)}</span>`).join('')}</div>
     </div>
-    ${s.summary?`<blockquote class="prose" style="margin:18px 0;padding:2px 0 2px 18px;border-left:3px solid var(--sage);color:var(--ink-dim);font-size:15px">${esc(s.summary)}</blockquote>`:''}
-    ${s.link?`<div style="margin-bottom:10px"><a href="${esc(s.link)}" target="_blank" rel="noopener" class="btn sm">原文連結 ↗</a></div>`:''}
-    <div class="prose">${md(s.content)||'<p class="muted">（尚無正文）</p>'}</div>
+    ${s.summary&&!s.thread?`<blockquote class="prose" style="margin:18px 0;padding:2px 0 2px 18px;border-left:3px solid var(--sage);color:var(--ink-dim);font-size:15px">${esc(s.summary)}</blockquote>`:''}
+    ${s.link&&!(s.thread&&s.thread.url===s.link)?`<div style="margin-bottom:10px"><a href="${esc(s.link)}" target="_blank" rel="noopener" class="btn sm">原文連結 ↗</a></div>`:''}
+    ${s.thread&&Array.isArray(s.thread.items)? renderThread(s.thread) : ''}
+    ${(s.content||!s.thread)?`<div class="prose">${md(s.content)||'<p class="muted">（尚無正文）</p>'}</div>`:''}
     <div class="orn">— END OF RECORD —</div>
     <div class="nav">
       <span>${prev?`<a data-go="story-${prev.id}">← ${esc(prev.title)}</a>`:''}</span>
@@ -1146,6 +1256,7 @@ document.addEventListener('click',e=>{
   const cp=t.closest('[data-copy]'); if(cp){ navigator.clipboard?.writeText(cp.dataset.copy).then(()=>toast('已複製 '+cp.dataset.copy)).catch(()=>toast(cp.dataset.copy)); return; }
   const tab=t.closest('.tabs[data-scope] button'); if(tab){ const sc=tab.parentElement.dataset.scope; ui.tab[sc]=tab.dataset.tab; tab.parentElement.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b===tab)); $('#scopeBody').innerHTML=scopeBody(sc,tab.dataset.tab); return; }
   if(t.closest('[data-paro-list]')){ openParoList(); return; }
+  const pl=t.closest('[data-pklang]'); if(pl){ ui.pkLang=pl.dataset.pklang; const y=window.scrollY; render(); window.scrollTo({top:y}); return; }
   const ct=t.closest('[data-ct]'); if(ct){ ui.commTab=ct.dataset.ct; render(); return; }
   const g=t.closest('[data-go]'); if(g && !t.closest('a[href]')){ e.preventDefault(); go(g.dataset.go); window.scrollTo({top:0}); }
 });
@@ -1153,6 +1264,7 @@ document.addEventListener('input',e=>{
   if(e.target.id==='sq'){ ui.storyQ=e.target.value; $('#storyList').innerHTML=storyCards(); }
 });
 document.addEventListener('change',e=>{
+  if(e.target.matches('[data-plurkimport]')){ const f=e.target.files[0]; e.target.value=''; if(f) importPlurkFile(f); return; }
   if(e.target.id==='ss'){ ui.storyScope=e.target.value; $('#storyList').innerHTML=storyCards(); }
   if(e.target.id==='st'){ ui.storyType=e.target.value; $('#storyList').innerHTML=storyCards(); }
 });
