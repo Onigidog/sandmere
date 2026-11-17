@@ -273,6 +273,7 @@ dl.fields dd{color:var(--ink-dim)}
 .f2{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
 @media (max-width:560px){.f2{grid-template-columns:1fr}}
 .modal-foot{display:flex;justify-content:space-between;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--rule)}
+.mrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:7px 18px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;z-index:60;opacity:0;transition:.25s;pointer-events:none}
 .toast.on{opacity:1}
 .banner{border:1px dashed var(--gold);color:var(--gold);font-family:var(--mono);font-size:12px;padding:8px 14px;margin-bottom:26px;letter-spacing:.03em}
@@ -342,9 +343,12 @@ const lines = s => String(s||'').split('\n').map(x=>x.trim()).filter(Boolean);
 const tagsOf = s => String(s||'').split(/[,，、]/).map(x=>x.trim()).filter(Boolean);
 function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('on'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('on'),1800); }
 
-const canEdit = () => mode==='local' || (!!user && (
-  (OWNER_EMAIL && user.email===OWNER_EMAIL) || (DB.meta.editors||[]).includes(user.email)));
-const isOwner = () => mode==='local' || (!!user && OWNER_EMAIL && user.email===OWNER_EMAIL);
+const em = e => String(e||'').trim().toLowerCase();
+const isOwner = () => mode==='local' || (!!user && !!OWNER_EMAIL && em(user.email)===em(OWNER_EMAIL));
+const isEditorListed = () => !!user && (DB.meta.editors||[]).map(em).includes(em(user.email));
+const canEdit = () => mode==='local' || isOwner() || isEditorListed();
+let myRequest = null;      // 自己送出的申請（非房主）
+DB.requests = [];          // 房主看到的待審核申請
 
 function scopeName(s){ if(!s||s==='main') return '霍洛伊本家'; const p=DB.paros.find(x=>x.id===s); return p? p.name : '（已刪除的 PARO）'; }
 function scopeOptions(){ return [['main','霍洛伊本家'], ...DB.paros.slice().sort(byOrder).map(p=>[p.id,'PARO・'+p.name])]; }
@@ -804,8 +808,7 @@ function openSettings(){
     <div class="f"><label>英文名（標題下的斜體小字）</label><input type="text" id="s_titleEn" value="${esc(m.titleEn??'Desert Worm, Drowned Amber')}"></div>
     <div class="f"><label>副標</label><input type="text" id="s_sub" value="${esc(m.subtitle||'')}"></div>
     <div class="f"><label>首頁介紹</label><textarea id="s_intro">${esc(m.intro||'')}</textarea></div>
-    ${fb?`<div class="f"><label>編輯者名單（Google 帳號 email，一行一個）</label><textarea id="s_ed" ${isOwner()?'':'disabled'}>${esc((m.editors||[]).join('\n'))}</textarea>
-      <div class="hint">${isOwner()?'名單內的人登入後可以新增與編輯；其他人只能瀏覽。站主不用填。':'只有站主可以修改編輯者名單。'}</div></div>`:''}
+    ${isOwner()?`<div class="f"><label>成員</label><button type="button" class="btn sm" data-members>成員管理與邀請…</button></div>`:''}
     <h2 style="font-size:16px;margin-top:24px">備份與搬家</h2>
     <div class="toolbar"><button class="btn sm" id="s_exp">匯出全部資料</button><button class="btn sm" id="s_imp">匯入資料…</button></div>
     <div class="hint muted small">匯出會產生一份 JSON（可下載或複製）。預覽模式裡打的內容，部署到 Firebase 後可以用「匯入」搬過去。</div>
@@ -813,7 +816,6 @@ function openSettings(){
   mm.querySelector('[data-x]').onclick=closeModal;
   mm.querySelector('#s_save').onclick=async()=>{
     const nm={...DB.meta, title:$('#s_title').value.trim(), titleEn:$('#s_titleEn').value.trim(), subtitle:$('#s_sub').value.trim(), intro:$('#s_intro').value};
-    const ed=$('#s_ed'); if(ed && isOwner()) nm.editors=lines(ed.value);
     try{ if(fb && !isOwner()){ toast('只有站主能改網站設定'); return; } await store.saveMeta(nm); closeModal(); toast('已儲存'); }catch(e){ toast('儲存失敗：'+(e.code||e.message)); }
   };
   mm.querySelector('#s_exp').onclick=()=>{
@@ -840,6 +842,87 @@ function openSettings(){
       closeModal(); toast(`已匯入 ${n} 筆`);
     };
   };
+}
+
+/* ----- 成員管理（房主） ----- */
+function siteURL(){ return location.href.split('#')[0]; }
+function openMembers(){
+  if(!isOwner()){ toast('只有房主可以管理成員'); return; }
+  const eds=(DB.meta.editors||[]).map(em);
+  const reqs=DB.requests.slice().sort((a,b)=>(a.at||0)-(b.at||0));
+  const m=openModal(`<div id="membersModal"><h2>成員管理</h2>
+    <div class="f"><label>房主</label><div class="mono small">${esc(mode==='local'?'（預覽模式）':OWNER_EMAIL)}</div></div>
+
+    <div class="f"><label>待審核的申請（${reqs.length}）</label>
+      ${reqs.length?`<div style="border-top:1px solid var(--rule)">${reqs.map(r=>`
+        <div class="mrow">
+          <span><b>${esc(r.name||r.email)}</b> <span class="muted mono small">${esc(r.email)}</span>
+            ${r.note?`<div class="small" style="color:var(--ink-dim);margin-top:2px">「${esc(r.note)}」</div>`:''}</span>
+          <span style="white-space:nowrap"><button class="btn sm pri" data-approve="${esc(r.email)}">同意</button> <button class="btn sm ghost" data-reject="${esc(r.email)}">拒絕</button></span>
+        </div>`).join('')}</div>`:`<div class="muted small">目前沒有人申請</div>`}
+    </div>
+
+    <div class="f"><label>編輯者（${eds.length}）</label>
+      ${eds.length?`<div style="border-top:1px solid var(--rule)">${eds.map(e=>`
+        <div class="mrow">
+          <span class="mono small">${esc(e)}</span>
+          <span><button class="btn sm ghost danger" data-unedit="${esc(e)}">移除</button></span>
+        </div>`).join('')}</div>`:`<div class="muted small">還沒有其他編輯者</div>`}
+    </div>
+
+    <form id="inviteForm" class="f"><label>邀請編輯者（對方的 Google 帳號 email）</label>
+      <div class="img-row"><input type="text" id="inviteEmail" placeholder="partner@gmail.com" autocomplete="off"><button class="btn pri" type="submit">邀請</button></div>
+      <div class="hint">加入後，對方用這個 Google 帳號登入就能編輯。也可以請對方先登入、按「申請編輯」，你再在上面按同意。</div>
+    </form>
+    <div class="modal-foot"><span></span><div><button class="btn ghost" data-x>關閉</button></div></div></div>`);
+  m.querySelector('[data-x]').onclick=closeModal;
+  m.querySelector('#inviteForm').addEventListener('submit',async e=>{
+    e.preventDefault();
+    const v=em($('#inviteEmail').value);
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)){ toast('email 格式不正確'); return; }
+    if(v===em(OWNER_EMAIL)){ toast('這是房主本人'); return; }
+    try{ await addEditor(v); showInviteText(v); }catch(err){ toast('邀請失敗：'+(err.code||err.message)); }
+  });
+}
+async function addEditor(email){
+  const eds=[...new Set([...(DB.meta.editors||[]).map(em), em(email)])];
+  await store.saveMeta({...DB.meta, editors:eds});
+  if(store.deleteRequest) await store.deleteRequest(email).catch(()=>{});
+}
+function showInviteText(email){
+  const msg=`我把你加進「${DB.meta.title||'沙蟲海珀'}」的編輯者了！
+網址：${siteURL()}
+請用 ${email} 這個 Google 帳號登入，就可以一起編輯。`;
+  const m=openModal(`<h2>已加入編輯者</h2>
+    <p class="small">可以把下面這段傳給對方：</p>
+    <div class="f"><textarea id="invMsg" readonly style="min-height:120px">${esc(msg)}</textarea></div>
+    <div class="modal-foot"><span></span><div><button class="btn" id="invCopy">複製</button> <button class="btn pri" data-back>回到成員管理</button></div></div>`,'sm');
+  m.querySelector('#invCopy').onclick=async()=>{ try{ await navigator.clipboard.writeText(msg); toast('已複製'); }catch{ $('#invMsg').select(); toast('請按 Ctrl+C 複製'); } };
+  m.querySelector('[data-back]').onclick=openMembers;
+}
+
+/* ----- 申請編輯（訪客） ----- */
+function openRequest(){
+  if(!user){ store.login(); return; }
+  const pending=!!myRequest;
+  const ownerPlaceholder = !OWNER_EMAIL || /you@gmail\.com/i.test(OWNER_EMAIL);
+  const m=openModal(`<h2>申請編輯權限</h2>
+    <div class="f"><label>目前登入</label><div class="mono small">${esc(user.email)}</div></div>
+    ${pending?`<p>已經送出申請，等房主同意後，重新整理頁面就能編輯。</p>`
+      :`<div class="f"><label>給房主的話（可留空）</label><input type="text" id="reqNote" placeholder="例如：我是誰、想幫忙整理哪一部分"></div>`}
+    <details style="margin-top:6px"><summary class="small muted" style="cursor:pointer">我是房主，但登入後顯示「僅瀏覽」？</summary>
+      <div class="small" style="margin-top:8px;line-height:1.8;color:var(--ink-dim)">
+        網站是用 <code>config.js</code> 的 <code>OWNER_EMAIL</code> 判斷房主的${ownerPlaceholder?'，<b style="color:var(--red)">目前它還是範例的 you@gmail.com</b>':''}。<br>
+        請把它改成你現在登入的帳號 <code>${esc(user.email)}</code>，<br>
+        並把 Firestore 規則裡 <code>ownerEmail()</code> 的信箱也改成一樣、按「發布」，然後重新整理。
+      </div></details>
+    <div class="modal-foot"><div>${pending?'<button class="btn ghost" id="reqCancel">取消申請</button>':''}</div>
+      <div><button class="btn ghost" data-x>關閉</button>${pending?'':' <button class="btn pri" id="reqSend">送出申請</button>'}</div></div>`,'sm');
+  m.querySelector('[data-x]').onclick=closeModal;
+  const send=m.querySelector('#reqSend');
+  if(send) send.onclick=async()=>{ try{ await store.requestAccess($('#reqNote').value.trim()); closeModal(); toast('已送出申請'); }catch(err){ toast('送出失敗：'+(err.code||err.message)); } };
+  const cancel=m.querySelector('#reqCancel');
+  if(cancel) cancel.onclick=async()=>{ try{ await store.deleteRequest(user.email); closeModal(); toast('已取消'); }catch(err){ toast('失敗：'+(err.code||err.message)); } };
 }
 
 /* ============================================================
@@ -872,9 +955,16 @@ let _raf=0; function schedule(){ cancelAnimationFrame(_raf); _raf=requestAnimati
 
 function renderAuth(){
   const a=$('#auth');
-  if(mode==='local'){ a.innerHTML=`<span class="badge warn">預覽模式</span><button class="btn sm ghost" data-settings title="網站設定">⚙</button>`; return; }
+  if(mode==='local'){ a.innerHTML=`<span class="badge warn">預覽模式</span><button class="btn sm ghost" data-members>成員</button><button class="btn sm ghost" data-settings title="網站設定">⚙</button>`; return; }
   if(!user){ a.innerHTML=`<button class="btn sm" data-login>Google 登入</button>`; return; }
-  a.innerHTML = `${user.photoURL?`<img src="${esc(user.photoURL)}" alt="">`:''}<span class="badge ${canEdit()?'ok':''}">${canEdit()?'可編輯':'僅瀏覽'}</span>${canEdit()?'<button class="btn sm ghost" data-settings title="網站設定">⚙</button>':''}<button class="btn sm ghost" data-logout>登出</button>`;
+  const role = isOwner()?'房主':canEdit()?'編輯者':'僅瀏覽';
+  const n = isOwner()? DB.requests.length : 0;
+  a.innerHTML = `${user.photoURL?`<img src="${esc(user.photoURL)}" alt="" title="${esc(user.email)}">`:''}
+    <span class="badge ${canEdit()?'ok':''}" title="${esc(user.email)}">${role}</span>
+    ${isOwner()?`<button class="btn sm ghost" data-members title="成員管理">成員${n?`<span style="background:var(--red);color:var(--paper);font-size:10px;padding:0 5px;margin-left:4px">${n}</span>`:''}</button>`:''}
+    ${!canEdit()?`<button class="btn sm" data-request>${myRequest?'申請中…':'申請編輯'}</button>`:''}
+    ${canEdit()?'<button class="btn sm ghost" data-settings title="網站設定">⚙</button>':''}
+    <button class="btn sm ghost" data-logout>登出</button>`;
 }
 
 document.addEventListener('click',e=>{
@@ -882,6 +972,11 @@ document.addEventListener('click',e=>{
   const ed=t.closest('[data-edit]'); if(ed){ e.stopPropagation(); const [c,id]=ed.dataset.edit.split(':'); openEditor(c, DB[c].find(x=>x.id===id)); return; }
   const ad=t.closest('[data-add]'); if(ad){ e.stopPropagation(); openEditor(ad.dataset.add, null, ad.dataset.preset?JSON.parse(ad.dataset.preset):{}); return; }
   if(t.closest('[data-settings]')){ openSettings(); return; }
+  if(t.closest('[data-members]')){ openMembers(); return; }
+  if(t.closest('[data-request]')){ openRequest(); return; }
+  const ap=t.closest('[data-approve]'); if(ap){ addEditor(ap.dataset.approve).then(()=>{ toast('已同意'); openMembers(); }).catch(err=>toast('失敗：'+(err.code||err.message))); return; }
+  const rj=t.closest('[data-reject]'); if(rj){ store.deleteRequest(rj.dataset.reject).then(()=>{ toast('已拒絕'); openMembers(); }).catch(err=>toast('失敗：'+(err.code||err.message))); return; }
+  const ue=t.closest('[data-unedit]'); if(ue){ askConfirm(`移除編輯者 ${ue.dataset.unedit}？`).then(async ok=>{ if(ok){ await store.saveMeta({...DB.meta, editors:(DB.meta.editors||[]).map(em).filter(x=>x!==ue.dataset.unedit)}); toast('已移除'); } openMembers(); }); return; }
   if(t.closest('[data-login]')){ store.login().catch(err=>toast('登入失敗：'+(err.code||err.message))); return; }
   if(t.closest('[data-logout]')){ store.logout(); return; }
   const cp=t.closest('[data-copy]'); if(cp){ navigator.clipboard?.writeText(cp.dataset.copy).then(()=>toast('已複製 '+cp.dataset.copy)).catch(()=>toast(cp.dataset.copy)); return; }
@@ -943,6 +1038,7 @@ function initLocal(){
     async remove(c,id){ DB[c]=DB[c].filter(x=>x.id!==id); persist(); schedule(); },
     async saveMeta(m){ DB.meta=m; persist(); schedule(); },
     login:async()=>{}, logout:async()=>{},
+    requestAccess:async()=>{}, deleteRequest:async()=>{},
   };
   ready=true; render();
 }
@@ -955,7 +1051,22 @@ async function initFirebase(){
   const [{initializeApp},A,F] = await Promise.all([import(base+'firebase-app.js'),import(base+'firebase-auth.js'),import(base+'firebase-firestore.js')]);
   const app=initializeApp(FIREBASE_CONFIG), db=F.getFirestore(app), auth=A.getAuth(app);
   mode='firebase';
-  A.onAuthStateChanged(auth,u=>{ user=u; schedule(); });
+  let unReq=null;
+  A.onAuthStateChanged(auth,u=>{
+    user=u; myRequest=null; DB.requests=[];
+    if(unReq){ unReq(); unReq=null; }
+    if(u){
+      if(isOwner()){
+        unReq=F.onSnapshot(F.collection(db,'requests'),snap=>{
+          DB.requests=snap.docs.map(d=>d.data());
+          schedule(); if($('#membersModal')) openMembers();
+        },err=>console.warn('requests',err));
+      }else{
+        unReq=F.onSnapshot(F.doc(db,'requests',em(u.email)),d=>{ myRequest=d.exists()?d.data():null; schedule(); },()=>{});
+      }
+    }
+    schedule();
+  });
   let pending=new Set([...COLS,'meta']);
   const done=k=>{ pending.delete(k); if(!pending.size){ ready=true; } schedule(); };
   COLS.forEach(c=>F.onSnapshot(F.collection(db,c),snap=>{ DB[c]=snap.docs.map(d=>({...d.data(),id:d.id})); done(c); },err=>{ console.error(c,err); done(c); }));
@@ -967,6 +1078,8 @@ async function initFirebase(){
     saveMeta:m=>F.setDoc(F.doc(db,'site','meta'),clean(m)),
     login:()=>A.signInWithPopup(auth,new A.GoogleAuthProvider()),
     logout:()=>A.signOut(auth),
+    requestAccess:note=>F.setDoc(F.doc(db,'requests',em(user.email)),{email:em(user.email),name:user.displayName||'',photo:user.photoURL||'',note:note||'',at:Date.now()}),
+    deleteRequest:email=>F.deleteDoc(F.doc(db,'requests',em(email))),
   };
 }
 
