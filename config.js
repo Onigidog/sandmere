@@ -15,4 +15,4 @@ export const firebaseConfig = {
 
 
 // ② 房主（你）的 Gmail，必須和 Firestore 規則裡的 ownerEmail() 一模一樣
-export const OWNER_EMAIL = "you@gmail.com";
+export const OWNER_EMAIL = "onigidog@gmail.com";
