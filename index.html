@@ -273,6 +273,39 @@ dl.fields dd{color:var(--ink-dim)}
 .f2{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
 @media (max-width:560px){.f2{grid-template-columns:1fr}}
 .modal-foot{display:flex;justify-content:space-between;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--rule)}
+/* 雙人時間軸 */
+.tl2-top{margin-bottom:10px}
+.tl2-heading{font-family:var(--sans);font-weight:900;font-size:26px;letter-spacing:.06em;margin:6px 0 14px;line-height:1.4}
+.tl2-legend{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;letter-spacing:.1em;border-top:3px solid var(--ink);border-bottom:1px solid var(--rule);padding:7px 0;margin-left:150px}
+.tl2-legend b{display:inline-block;background:var(--ink);color:var(--paper);font-weight:500;padding:0 6px;margin:0 8px 0 0}
+.tl2-legend span:last-child b{margin:0 0 0 8px}
+.tl2{margin-top:8px}
+.tl2-item{display:grid;grid-template-columns:120px 1fr;gap:0 30px;padding-top:44px}
+.tl2-item:hover .edit-row{opacity:1}
+.tl2-num{display:flex;flex-direction:column;align-items:center;padding-top:2px}
+.tl2-num span{font-family:"EB Garamond",var(--serif);font-weight:600;font-size:62px;line-height:.85;letter-spacing:-.02em}
+.tl2-num i{display:block;width:1px;height:26px;background:var(--ink);margin:14px 0 10px}
+.tl2-num em{font-family:var(--mono);font-style:normal;font-size:12px;letter-spacing:.14em;color:var(--ink-dim);min-height:1em}
+.tl2-body{position:relative;border-bottom:1px solid var(--rule);padding-bottom:6px}
+.tl2-ages{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--ink-dim);padding:0 0 6px;border-bottom:1px solid var(--line)}
+.tl2-ages b{color:var(--red);font-weight:500;margin-right:10px;letter-spacing:.04em}
+.tl2-ages span:last-child b{margin:0 0 0 10px}
+.tl2-title{position:relative;text-align:center;font-family:var(--sans);font-weight:700;font-size:21px;letter-spacing:.08em;margin:20px auto 2px;padding:10px 46px;width:fit-content;max-width:100%;line-height:1.5}
+.tl2-title::before,.tl2-title::after{content:"";position:absolute;width:12px;height:24px;border:0 solid var(--ink)}
+.tl2-title::before{left:0;top:0;border-left-width:1px;border-top-width:1px}
+.tl2-title::after{right:0;bottom:0;border-right-width:1px;border-bottom-width:1px}
+.tl2-link{text-align:center;font-family:var(--mono);font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--ink-dim)}
+.tl2-link a{color:var(--red);text-decoration:underline;text-decoration-color:var(--red);cursor:pointer}
+.tl2-cols{display:grid;grid-template-columns:1fr 1fr;margin-top:18px;border-top:1px solid var(--line)}
+.tl2-c{padding:16px 22px 20px 0;min-height:70px}
+.tl2-c.b{padding:16px 0 20px 22px;border-left:1px solid var(--line)}
+.tl2-c.none{color:var(--line);font-family:var(--mono)}
+.tl2-c h4{font-family:var(--sans);font-weight:700;font-size:18px;margin:0 0 6px;letter-spacing:.05em}
+.tl2-c .prose{font-size:15px;line-height:1.85;color:var(--ink-dim)}
+.tl2-c .prose ul{padding-left:1.1em;margin:0}
+.tl2-desc{border-top:1px dashed var(--line);padding:10px 0 4px;font-size:14.5px;color:var(--ink-dim);text-align:center}
+.tl2-chars{padding:4px 0 6px}
+@media (max-width:700px){.tl2-item{grid-template-columns:52px 1fr;gap:0 14px}.tl2-num span{font-size:34px}.tl2-legend{margin-left:0}.tl2-title{padding:8px 26px;font-size:18px}.tl2-c{padding-right:12px}.tl2-c.b{padding-left:12px}}
 .mrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:7px 18px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;z-index:60;opacity:0;transition:.25s;pointer-events:none}
 .toast.on{opacity:1}
@@ -325,9 +358,9 @@ async function loadConfig(){
   }catch(e){ console.info('config.js 未載入，使用預覽模式'); }
 }
 
-const COLS = ['chars','events','lore','stories','paros','sheets','comms'];
+const COLS = ['chars','events','lore','stories','paros','sheets','comms','tlconf'];
 const LS_KEY = 'hippocampus-site-v1';
-const DB = { meta:{}, chars:[], events:[], lore:[], stories:[], paros:[], sheets:[], comms:[] };
+const DB = { meta:{}, chars:[], events:[], lore:[], stories:[], paros:[], sheets:[], comms:[], tlconf:[] };
 let store = null, user = null, mode = 'local', ready = false;
 const ui = { tab:{}, storyQ:'', storyScope:'', storyType:'', commTab:'sheets' };
 
@@ -420,13 +453,14 @@ const SCHEMA = {
     {k:'profile',l:'詳細設定',t:'md',tall:1},
     {k:'tags',l:'標籤',hint:'用逗號分隔'},
   ]},
-  events: { title:'時間軸事件', fields:[
-    {k:'when',l:'時間（顯示用）',req:1,half:1,hint:'例：四年級・十月 / 12 歲 / 1999'},
-    {k:'sort',l:'排序鍵',half:1,hint:'依此排列，例：2018-10 或 0405'},
-    {k:'scope',l:'所屬',t:'scope',half:1},
-    {k:'title',l:'事件',req:1,half:1},
-    {k:'chars',l:'相關角色',t:'chars'},
-    {k:'desc',l:'描述',t:'md'},
+  events: { title:'時間軸階段', fields:[
+    {k:'title',l:'階段標題（中間）',req:1,hint:'例：初識，於夜晚的六角湖相遇'},
+    {k:'ageA',l:'A 年齡',t:'number',half:1},{k:'ageB',l:'B 年齡',t:'number',half:1,hint:'留空會依「年齡差」自動算'},
+    {k:'textA',l:'A 的經歷',t:'md',half:1,ph:'四年級\n- 畢業',hint:'第一行是小標，下面用「- 」列點'},{k:'textB',l:'B 的經歷',t:'md',half:1,ph:'六年級\n- 畢業，返回義大利'},
+    {k:'link',l:'章節標記',half:1,hint:'例：CH1（可留空）'},{k:'storyId',l:'連到故事',t:'storySelect',half:1},
+    {k:'when',l:'時間標記（可留空）',half:1,hint:'例：2019 / 夏'},{k:'sort',l:'排序（可留空）',half:1,hint:'留空依左欄年齡排列'},
+    {k:'scope',l:'所屬',t:'scope',half:1},{k:'chars',l:'其他相關角色',t:'chars',half:1},
+    {k:'desc',l:'共同備註（可留空）',t:'md'},
   ]},
   lore: { title:'世界觀條目', fields:[
     {k:'title',l:'標題',req:1,half:1},{k:'category',l:'分類',half:1,hint:'例：學院、魔法、種族、地理'},
@@ -493,13 +527,14 @@ function fieldHTML(f, v){
   let input='';
   switch(f.t){
     case 'textarea': input=`<textarea id="${id}">${esc(val)}</textarea>`; break;
-    case 'md': input=`<textarea id="${id}" class="${f.tall?'tall':''}" placeholder="支援：# 標題、**粗體**、*斜體*、> 引用、- 清單、--- 分隔線、||防雷||、[文字](網址)">${esc(val)}</textarea>`; break;
+    case 'md': input=`<textarea id="${id}" class="${f.tall?'tall':''}" placeholder="${f.ph?esc(f.ph):'支援：# 標題、**粗體**、*斜體*、> 引用、- 清單、--- 分隔線、||防雷||、[文字](網址)'}">${esc(val)}</textarea>`; break;
     case 'number': input=`<input type="number" id="${id}" value="${esc(val)}">`; break;
     case 'date': input=`<input type="date" id="${id}" value="${esc(val)}">`; break;
     case 'url': input=`<input type="text" id="${id}" value="${esc(val)}" placeholder="https://">`; break;
     case 'color': input=`<input type="text" id="${id}" value="${esc(val||'#ad3328')}" placeholder="#ad3328">`; break;
     case 'select': input=`<select id="${id}">${f.opts.map(o=>`<option ${o===val?'selected':''}>${esc(o)}</option>`).join('')}</select>`; break;
     case 'scope': input=`<select id="${id}">${scopeOptions().map(([k,n])=>`<option value="${k}" ${k===(val||'main')?'selected':''}>${esc(n)}</option>`).join('')}</select>`; break;
+    case 'storySelect': input=`<select id="${id}"><option value="">（不連結）</option>${DB.stories.slice().sort(byDateDesc).map(x=>`<option value="${x.id}" ${x.id===val?'selected':''}>${esc(x.title)}</option>`).join('')}</select>`; break;
     case 'charSelect': input=`<select id="${id}"><option value="">（無）</option>${DB.chars.slice().sort(byOrder).map(c=>`<option value="${c.id}" ${c.id===val?'selected':''}>${esc(c.name)}（${esc(scopeName(c.scope))}）</option>`).join('')}</select>`; break;
     case 'chars': {
       const sel=new Set(val||[]);
@@ -513,7 +548,14 @@ function fieldHTML(f, v){
 }
 
 function openEditor(col, item, preset={}){
-  const sch=SCHEMA[col]; const isNew=!item; const obj = item ? {...item} : {id:uid(), ...preset};
+  const isNew=!item; const obj = item ? {...item} : {id:uid(), ...preset};
+  let sch=SCHEMA[col];
+  if(col==='events'){
+    const cf=tlConf(obj.scope||'main');
+    sch={...sch, fields:sch.fields.map(f=>({...f,
+      l: f.l.replace(/^A /,cf.nameA+' ').replace(/^B /,cf.nameB+' ').replace(/^A 的/,cf.nameA+' 的').replace(/^B 的/,cf.nameB+' 的'),
+      hint: f.k==='ageB' ? (cf.gap!==''&&cf.gap!=null ? `留空會自動算（${cf.nameA} ${Number(cf.gap)>=0?'+':''}${cf.gap}）` : '') : f.hint }))};
+  }
   if(isNew && col==='stories' && !obj.date) obj.date=today();
   if(isNew && col==='comms' && !obj.date) obj.date=today();
   if(isNew && !obj.scope && sch.fields.some(f=>f.t==='scope')) obj.scope='main';
@@ -546,6 +588,7 @@ function openEditor(col, item, preset={}){
     }
     const miss=sch.fields.find(f=>f.req && !String(obj[f.k]||'').trim());
     if(miss){ toast(`請填寫「${miss.l}」`); return; }
+    if(col==='events'){ const cf=tlConf(obj.scope||'main'); if((obj.ageB===''||obj.ageB==null) && obj.ageA!=='' && obj.ageA!=null && cf.gap!=='' && cf.gap!=null) obj.ageB=Number(obj.ageA)+Number(cf.gap); }
     obj.updatedAt=Date.now(); obj.updatedBy= user?.displayName || user?.email || '';
     try{ await store.save(col,obj); closeModal(); toast('已儲存'); }
     catch(err){ console.error(err); toast('儲存失敗：'+(err.code||err.message||'')); }
@@ -639,19 +682,71 @@ function scopeBody(scope,t){
     const items=DB.chars.filter(inScope).sort(byOrder);
     return `<div class="toolbar">${addBtn('chars','新增角色',{scope})}</div>` + (items.length?`<div class="grid g4">${items.map(charCard).join('')}</div>`:emptyBox('還沒有角色'));
   }
-  if(t==='time'){
-    const items=DB.events.filter(inScope).sort(bySort);
-    return `<div class="toolbar">${addBtn('events','新增事件',{scope})}</div>` + (items.length?`<div class="timeline">${items.map(e=>`
-      <div class="tl-item"><div class="when">${esc(e.when)}</div>
-        <div class="card"><div class="top-right">${editBtn('events',e.id)}</div>
-          <h3>${esc(e.title)}</h3><div>${charChips(e.chars)}</div>
-          ${e.desc?`<div class="prose" style="margin-top:8px;font-size:15px">${md(e.desc)}</div>`:''}</div></div>`).join('')}</div>`:emptyBox('時間軸是空的'));
-  }
+  if(t==='time') return renderTimeline(scope);
   if(t==='stories'){
     const items=DB.stories.filter(inScope).sort(byDateDesc);
     return `<div class="toolbar">${addBtn('stories','新增故事',{scope})}</div>` + (items.length?`<div class="rows">${items.map(storyRow).join('')}</div>`:emptyBox('這個 PARO 還沒有故事'));
   }
   return '';
+}
+
+/* ----- 雙人時間軸 ----- */
+function tlConf(scope){
+  const c=DB.tlconf.find(x=>x.id===scope)||{};
+  let pool=DB.chars.filter(x=>(x.scope||'main')===scope).sort(byOrder);
+  if(pool.length<2) pool=[...pool, ...DB.chars.filter(x=>(x.scope||'main')==='main').sort(byOrder)];
+  const a=c.a||pool[0]?.id||'', b=c.b||pool.find(x=>x.id!==a)?.id||'';
+  return { heading:c.heading||'', a, b, gap:c.gap??'', nameA:charName(a)||'A', nameB:charName(b)||'B' };
+}
+const tlKey = e => String(e.sort!==''&&e.sort!=null ? e.sort : (e.ageA??''));
+const tlSort = (x,y) => tlKey(x).localeCompare(tlKey(y),undefined,{numeric:true}) || String(x.title||'').localeCompare(String(y.title||''));
+function tlCol(txt, side){
+  const L=String(txt||'').split('\n'); while(L.length && !L[0].trim()) L.shift();
+  if(!L.length) return `<div class="tl2-c ${side} none">—</div>`;
+  const head=L[0].trim(), rest=L.slice(1).join('\n');
+  const isList=/^[-*・]\s/.test(head);
+  return `<div class="tl2-c ${side}">${isList?'':`<h4>${inline(esc(head))}</h4>`}${md(isList?L.join('\n'):rest)?`<div class="prose">${md(isList?L.join('\n'):rest)}</div>`:''}</div>`;
+}
+function renderTimeline(scope){
+  const cf=tlConf(scope);
+  const items=DB.events.filter(x=>(x.scope||'main')===scope).sort(tlSort);
+  const age=v=> (v===''||v==null)? '—' : esc(v)+'Y';
+  const head=`<div class="tl2-top">
+      <div class="mono small muted" style="letter-spacing:.16em">TIMELINE ／ ${esc(scopeName(scope))}</div>
+      ${cf.heading?`<h2 class="tl2-heading">${esc(cf.heading)}</h2>`:''}
+      <div class="tl2-legend"><span><b>A</b>${esc(cf.nameA)}</span><span>${esc(cf.nameB)}<b>B</b></span></div>
+      <div class="toolbar" style="margin:14px 0 0">${addBtn('events','新增階段',{scope})}${canEdit()?`<button class="btn sm ghost" data-tlconf="${scope}">時間軸設定</button>`:''}</div>
+    </div>`;
+  if(!items.length) return head+emptyBox('時間軸是空的');
+  return head+`<div class="tl2">${items.map((e,i)=>{
+    const st=e.storyId && DB.stories.find(x=>x.id===e.storyId);
+    const linkTxt=e.link || (st? st.title : '');
+    return `<article class="tl2-item">
+      <div class="tl2-num"><span>${String(i+1).padStart(2,'0')}</span><i></i><em>${esc(e.when||'')}</em></div>
+      <div class="tl2-body">
+        <div class="edit-row" style="position:absolute;right:0;top:-30px">${canEdit()?`<button class="btn sm" data-edit="events:${e.id}">編輯</button>`:''}</div>
+        <div class="tl2-ages"><span><b>${age(e.ageA)}</b>${esc(cf.nameA)}</span><span>${esc(cf.nameB)}<b>${age(e.ageB)}</b></span></div>
+        <h3 class="tl2-title">${esc(e.title)}</h3>
+        ${linkTxt?`<div class="tl2-link">${st?`<a data-go="story-${st.id}">${esc(linkTxt)}</a>`:esc(linkTxt)}</div>`:''}
+        <div class="tl2-cols">${tlCol(e.textA,'a')}${tlCol(e.textB,'b')}</div>
+        ${e.desc?`<div class="tl2-desc prose">${md(e.desc)}</div>`:''}
+        ${(e.chars||[]).length?`<div class="tl2-chars">${charChips(e.chars)}</div>`:''}
+      </div></article>`; }).join('')}</div>`;
+}
+function openTlConf(scope){
+  const cf=tlConf(scope); const opts=sel=>DB.chars.slice().sort(byOrder).map(c=>`<option value="${c.id}" ${c.id===sel?'selected':''}>${esc(c.name)}（${esc(scopeName(c.scope))}）</option>`).join('');
+  const m=openModal(`<h2>時間軸設定・${esc(scopeName(scope))}</h2>
+    <div class="f"><label>時間軸標題</label><input type="text" id="tc_h" value="${esc(cf.heading)}" placeholder="例：認識10年，共同生活軌跡7年"></div>
+    <div class="f2"><div class="f"><label>左欄角色（A）</label><select id="tc_a">${opts(cf.a)}</select></div>
+      <div class="f"><label>右欄角色（B）</label><select id="tc_b">${opts(cf.b)}</select></div></div>
+    <div class="f"><label>年齡差（B 減 A）</label><input type="number" id="tc_g" value="${esc(cf.gap)}" placeholder="例：2"><div class="hint">填了之後，新增階段只要輸入 A 的年齡，B 會自動算好</div></div>
+    <div class="modal-foot"><span></span><div><button class="btn ghost" data-x>取消</button> <button class="btn pri" id="tc_s">儲存</button></div></div>`,'sm');
+  m.querySelector('[data-x]').onclick=closeModal;
+  m.querySelector('#tc_s').onclick=async()=>{
+    const g=$('#tc_g').value;
+    try{ await store.save('tlconf',{id:scope, heading:$('#tc_h').value.trim(), a:$('#tc_a').value, b:$('#tc_b').value, gap:g===''?'':Number(g)}); closeModal(); toast('已儲存'); }
+    catch(err){ toast('儲存失敗：'+(err.code||err.message)); }
+  };
 }
 
 /* ----- 設定 ----- */
@@ -662,7 +757,8 @@ function viewChar(id){
   const c=DB.chars.find(x=>x.id===id);
   if(!c) return emptyBox('找不到這個角色');
   const f=lines(c.fields).map(l=>{ const i=l.search(/[:：]/); return i>0?[l.slice(0,i),l.slice(i+1)]:['',l]; });
-  const evs=DB.events.filter(e=>(e.chars||[]).includes(id)).sort(bySort);
+  const evs=DB.events.filter(e=>{ const cf=tlConf(e.scope||'main'); return (e.chars||[]).includes(id) || (cf.a===id && (e.textA||e.ageA!=='')) || (cf.b===id && (e.textB||e.ageB!=='')); }).sort(tlSort)
+    .map(e=>{ const cf=tlConf(e.scope||'main'); const ag= cf.a===id? e.ageA : cf.b===id? e.ageB : ''; return {...e, _when: (ag!==''&&ag!=null? ag+'Y' : '') || e.when || ''}; });
   const sts=DB.stories.filter(s=>(s.chars||[]).includes(id)).sort(byDateDesc);
   const sheet=DB.sheets.find(s=>s.charId===id);
   const back = (c.scope&&c.scope!=='main')? `paro-${c.scope}` : 'lore';
@@ -678,7 +774,7 @@ function viewChar(id){
       ${f.length?`<dl class="fields">${f.map(([k,v])=>`<dt>${esc(k)}</dt><dd>${inline(esc(v))}</dd>`).join('')}</dl>`:''}
       <div>${tagsOf(c.tags).map(t=>`<span class="chip">${esc(t)}</span>`).join('')}</div>
       ${c.profile?`<div class="prose" style="margin-top:18px">${md(c.profile)}</div>`:''}
-      ${evs.length?`<h2 class="sec">經歷 <span class="en">Timeline</span></h2><div class="timeline">${evs.map(e=>`<div class="tl-item"><div class="when">${esc(e.when)}</div><div class="card" style="padding:10px 16px"><b>${esc(e.title)}</b>${e.scope&&e.scope!==c.scope?` <span class="chip">${esc(scopeName(e.scope))}</span>`:''}</div></div>`).join('')}</div>`:''}
+      ${evs.length?`<h2 class="sec">經歷 <span class="en">Timeline</span></h2><div class="timeline">${evs.map(e=>`<div class="tl-item"><div class="when">${esc(e._when)}</div><div class="card" style="padding:10px 16px"><b>${esc(e.title)}</b>${e.scope&&e.scope!==c.scope?` <span class="chip">${esc(scopeName(e.scope))}</span>`:''}</div></div>`).join('')}</div>`:''}
       ${sts.length?`<h2 class="sec">登場故事 <span class="en">Stories</span></h2><div class="rows">${sts.map(storyRow).join('')}</div>`:''}
     </div>
   </div>`;
@@ -973,6 +1069,7 @@ document.addEventListener('click',e=>{
   const ad=t.closest('[data-add]'); if(ad){ e.stopPropagation(); openEditor(ad.dataset.add, null, ad.dataset.preset?JSON.parse(ad.dataset.preset):{}); return; }
   if(t.closest('[data-settings]')){ openSettings(); return; }
   if(t.closest('[data-members]')){ openMembers(); return; }
+  const tc=t.closest('[data-tlconf]'); if(tc){ openTlConf(tc.dataset.tlconf); return; }
   if(t.closest('[data-request]')){ openRequest(); return; }
   const ap=t.closest('[data-approve]'); if(ap){ addEditor(ap.dataset.approve).then(()=>{ toast('已同意'); openMembers(); }).catch(err=>toast('失敗：'+(err.code||err.message))); return; }
   const rj=t.closest('[data-reject]'); if(rj){ store.deleteRequest(rj.dataset.reject).then(()=>{ toast('已拒絕'); openMembers(); }).catch(err=>toast('失敗：'+(err.code||err.message))); return; }
@@ -996,6 +1093,14 @@ window.addEventListener('hashchange',()=>{ render(); window.scrollTo({top:0}); }
 /* ============================================================
    資料層：預覽模式（localStorage）
    ============================================================ */
+function seedEvents(){
+  return [
+    {id:uid(), scope:'main', title:'未相識', ageA:11, ageB:13, textA:'', textB:'', link:'', chars:[]},
+    {id:uid(), scope:'main', title:'初識，於夜晚的六角湖相遇', ageA:13, ageB:15, textA:'一年級', textB:'三年級', link:'', chars:[]},
+    {id:uid(), scope:'main', title:'霍洛伊魔法學院一期', ageA:16, ageB:18, textA:'四年級', textB:'六年級\n- 畢業，返回義大利', link:'CH1', chars:[]},
+    {id:uid(), scope:'main', title:'斷聯', ageA:18, ageB:20, textA:'六年級\n- 畢業\n- 和賽勒斯一起尋找母親，找到後在她身邊生活了一年', textB:'', link:'', chars:[]},
+  ];
+}
 function seed(){
   const dar='c'+uid(), dan='c'+uid();
   return {
@@ -1013,11 +1118,8 @@ function seed(){
       {id:uid(), scope:'main', category:'學院', title:'夜靈日', order:2, content:'十月最後一個星期三開始，全校陷入為期一週的黑暗。\n\n- 晚上 11 點起配戴魔法飾品（每人外觀不同），可看見平時看不見的靈體——校園幽靈，或召喚來的熟悉之人\n- 效果最多三小時，凌晨 2 點失效\n- 結束後可留作紀念，也可歸還'},
       {id:uid(), scope:'main', category:'種族', title:'垂星之子', order:3, content:'魔力來自星辰，而非土地、血脈或元素。每人出生時被一顆共鳴的「命星」選中。\n\n- 命星長時間沉在地平線下會出現**星隱症狀**（頭痛、失眠、記憶模糊），久留一地則惡化為致命的**墜落**\n- 以「星隊」為單位，沿世代相傳的「星軌路」遷徙\n- 禁忌：**築基**（建造永久居所）\n- 混血兒繼承「不完整的命星牽引」'},
     ],
-    events:[
-      {id:uid(), scope:'main', when:'過去', sort:'01', title:'塔利亞被星隊帶回星軌路', chars:[dar], desc:'母親塔利亞因築基而瀕臨墜落，被星隊強行帶走，留下達魯與一只耳環。'},
-      {id:uid(), scope:'main', when:'過去', sort:'02', title:'獻眼與魔法覺醒', chars:[dar], desc:'失去雙眼、獲得魔法構成的義眼，覺醒〈餓鬼的餐桌〉。'},
-      {id:uid(), scope:'main', when:'11月8日', sort:'03', title:'達魯的生日', chars:[dar], desc:''},
-    ],
+    events: seedEvents(),
+    tlconf:[{id:'main', heading:'認識10年，共同生活軌跡7年', a:dar, b:dan, gap:2}],
     stories:[
       {id:uid(), title:'HIPPOCAMPUS', type:'交流', scope:'main', author:'麥 × Niyam_sixso11_', date:today(), chars:[dar,dan], tags:'夢境, 套娃, 海馬迴',
        summary:'達魯拿到能悄悄打開他人夢境的鑰匙，進入丹德里提的夢——以為是夢，眼前先出現的卻是一個套娃。',
@@ -1031,6 +1133,12 @@ function initLocal(){
   let data=null; try{ data=JSON.parse(localStorage.getItem(LS_KEY)||'null'); }catch{}
   if(!data) data=seed();
   DB.meta=data.meta||{}; if(DB.meta.title==='HIPPOCAMPUS') DB.meta.title='沙蟲海珀'; if(String(DB.meta.intro||'').startsWith('霍洛伊學院・架空 21 世紀英國。')) DB.meta.intro=''; COLS.forEach(c=>DB[c]=data[c]||[]); DB.chars=DB.chars.filter(c=>c.name!=='里弗·雷文');
+  const OLD=['塔利亞被星隊帶回星軌路','獻眼與魔法覺醒','達魯的生日'];
+  if(DB.events.length && DB.events.every(e=>OLD.includes(e.title))){
+    DB.events=seedEvents();
+    const dar=DB.chars.find(c=>c.name==='達魯'), dan=DB.chars.find(c=>c.name==='丹德里提');
+    if(!DB.tlconf.length) DB.tlconf=[{id:'main', heading:'認識10年，共同生活軌跡7年', a:dar?.id||'', b:dan?.id||'', gap:2}];
+  }
   const persist=()=>{ try{ const d={meta:DB.meta}; COLS.forEach(c=>d[c]=DB[c]); localStorage.setItem(LS_KEY,JSON.stringify(d)); }catch(e){ console.warn(e); toast('瀏覽器儲存空間不足或無法使用，資料只會保留到關閉分頁'); } };
   persist();
   store={
