@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>沙蟲海珀 · 達魯 & 丹德里提</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=Noto+Serif+TC:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   沙蟲海珀 — 達魯 & 丹德里提 共筆紀錄站
+   風格：檔案冊／標本分類表。紙白＋墨黑為主，低飽和金、灰綠為輔，紅色提點
+   ============================================================ */
+:root{
+  --paper:#ebe9e3; --paper2:#f1efea; --paper3:#e0ddd5;
+  --ink:#1b1b19; --ink-dim:#4d4b46; --mute:#8a867d;
+  --line:#c6c2b8; --rule:#1b1b19;
+  --red:#a3372e; --gold:#958865; --gold-soft:#bdb498; --sage:#76807a; --sage-soft:#a9afaa;
+  /* 舊變數名對應（內嵌樣式沿用） */
+  --abyss:var(--paper); --deep:var(--paper3); --panel:var(--paper2); --panel2:var(--paper3);
+  --bone:var(--ink); --bone-dim:var(--ink-dim);
+  --sea:var(--red); --sea-soft:var(--red); --vein:var(--sage); --vein-dim:var(--sage-soft);
+  --serif:"Noto Serif TC","Noto Serif CJK TC","Source Han Serif TC","Songti TC","PMingLiU",serif;
+  --sans:"Noto Serif TC","Noto Serif CJK TC","Source Han Serif TC","Songti TC","PMingLiU",serif;
+  --mono:"IBM Plex Mono","Noto Serif TC","Noto Serif CJK TC","Source Han Serif TC","Songti TC","PMingLiU",monospace;
+  --latin:var(--mono);
+  --r:0px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);line-height:1.8;font-size:16px;min-height:100vh;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.1  0 0 0 0 0.1  0 0 0 0 0.09  0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--gold-soft);text-underline-offset:3px}
+a:hover{color:var(--red);text-decoration-color:var(--red)}
+[data-go]{text-decoration:none}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+img{max-width:100%}
+::selection{background:var(--red);color:var(--paper)}
+.mono{font-family:var(--mono)}
+
+/* ---------- header ---------- */
+header.top{position:sticky;top:0;z-index:20;background:rgba(235,233,227,.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--rule)}
+.top-inner{max-width:1180px;margin:0 auto;display:flex;align-items:stretch;gap:0;padding:0 20px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;color:var(--ink);cursor:pointer;padding:12px 22px 12px 0;border-right:1px solid var(--rule);margin-right:8px}
+.brand svg{width:26px;height:26px;flex:none}
+.brand b{font-family:var(--mono);letter-spacing:.18em;font-size:14px;font-weight:500}
+nav.main{display:flex;gap:0;flex-wrap:wrap;flex:1;align-items:stretch}
+nav.main a{padding:14px 16px 12px;color:var(--ink-dim);font-family:var(--sans);font-size:14px;letter-spacing:.12em;position:relative;text-decoration:none;display:flex;align-items:baseline;gap:6px}
+nav.main a::before{content:attr(data-n);font-family:var(--mono);font-size:10px;color:var(--mute);letter-spacing:0}
+nav.main a:hover{color:var(--ink)}
+nav.main a.on{color:var(--ink)}
+nav.main a.on::after{content:"";position:absolute;left:12px;right:12px;bottom:-1px;height:3px;background:var(--red)}
+.auth{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-dim)}
+.auth img{width:24px;height:24px;border-radius:50%;filter:grayscale(1)}
+.badge{font-family:var(--mono);font-size:11px;padding:1px 8px;border:1px solid var(--ink);color:var(--ink);white-space:nowrap;letter-spacing:.05em;text-transform:uppercase}
+.badge.warn{border-color:var(--gold);color:var(--gold)}
+.badge.ok{border-color:var(--sage);color:var(--sage)}
+
+/* ---------- layout ---------- */
+main{max-width:1180px;margin:0 auto;padding:40px 20px 80px}
+.page-head{display:grid;grid-template-columns:200px 1fr auto;gap:24px;align-items:start;margin-bottom:34px;padding-bottom:20px;border-bottom:1px solid var(--rule)}
+.page-head .num{font-family:var(--mono);font-size:22px;letter-spacing:.04em;color:var(--ink)}
+.page-head h1{margin:0;font-family:var(--sans);font-size:30px;letter-spacing:.06em;font-weight:900;line-height:1.25}
+.page-head .en{display:block;font-family:var(--mono);color:var(--ink-dim);font-size:13px;letter-spacing:.14em;font-weight:400;text-transform:uppercase;margin-top:6px}
+@media (max-width:760px){.page-head{grid-template-columns:1fr}}
+h2.sec{font-family:var(--mono);font-size:13px;letter-spacing:.16em;margin:48px 0 14px;display:flex;align-items:baseline;gap:12px;font-weight:500;text-transform:uppercase;padding-bottom:2px}
+h2.sec::before{content:"/";color:var(--red)}
+h2.sec .en{font-family:var(--mono);color:var(--mute);font-size:12px;letter-spacing:.15em;font-weight:400;margin-left:auto}
+.muted{color:var(--mute)}
+.small{font-size:13px}
+
+/* ---------- buttons / chips ---------- */
+.btn{display:inline-flex;align-items:center;gap:6px;background:transparent;border:1px solid var(--ink);color:var(--ink);padding:5px 14px;cursor:pointer;font-family:var(--mono);font-size:12px;letter-spacing:.08em;transition:.12s;text-decoration:none;border-radius:0}
+.btn:hover{background:var(--ink);color:var(--paper)}
+.btn.pri{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.btn.pri:hover{background:var(--red);border-color:var(--red);color:var(--paper)}
+.btn.ghost{border-color:transparent;color:var(--ink-dim)}
+.btn.ghost:hover{color:var(--ink);background:transparent;border-color:var(--ink)}
+.btn.danger:hover{background:var(--red);border-color:var(--red);color:var(--paper)}
+.btn.sm{padding:2px 10px;font-size:11px}
+.chip{display:inline-block;font-family:var(--mono);font-size:11px;padding:0 7px;border:1px solid var(--line);color:var(--ink-dim);margin:2px 4px 2px 0;white-space:nowrap;letter-spacing:.03em;text-decoration:none}
+.chip.sea{border-color:var(--red);color:var(--red)}
+.chip.vein{border-color:var(--sage);color:var(--sage)}
+a.chip:hover{border-color:var(--ink);color:var(--ink)}
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--rule);margin-bottom:28px;flex-wrap:wrap}
+.tabs button{background:none;border:none;border-right:1px solid var(--line);padding:9px 20px;cursor:pointer;color:var(--ink-dim);font-family:var(--sans);font-size:14px;letter-spacing:.12em;position:relative}
+.tabs button:first-child{padding-left:2px}
+.tabs button.on{color:var(--ink);font-weight:600}
+.tabs button.on::after{content:"";position:absolute;left:20px;right:20px;bottom:-2px;height:3px;background:var(--red)}
+.tabs button:first-child.on::after{left:2px}
+.tabs button:hover{color:var(--ink)}
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:22px}
+.toolbar input,.toolbar select{background:transparent;border:none;border-bottom:1px solid var(--ink);padding:6px 4px;min-width:0;font-family:var(--mono);font-size:13px;border-radius:0}
+.toolbar input{flex:1;min-width:180px}
+.toolbar input:focus,.toolbar select:focus{outline:none;border-bottom-color:var(--red)}
+.edit-row{display:flex;gap:6px;opacity:0;transition:.15s}
+.card:hover .edit-row,.edit-row.show{opacity:1}
+@media (hover:none){.edit-row{opacity:1}}
+
+/* ---------- cards ---------- */
+.grid{display:grid;gap:0}
+.g2,.g3,.g4{gap:22px}
+.g2{grid-template-columns:repeat(auto-fill,minmax(320px,1fr))}
+.g3{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.g4{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+.card{background:transparent;border:none;border-top:1px solid var(--rule);padding:16px 0 18px;position:relative}
+.card.link{cursor:pointer}
+.card.link:hover h3{color:var(--red)}
+.card h3{margin:0 0 4px;font-family:var(--sans);font-size:18px;letter-spacing:.04em;font-weight:700;line-height:1.35;transition:color .12s}
+.card .en{font-family:var(--mono);color:var(--mute);font-size:12px;letter-spacing:.06em}
+.card .meta{font-family:var(--mono);font-size:12px;color:var(--mute);margin:4px 0 8px}
+.card .sum{color:var(--ink-dim);font-size:15px;line-height:1.7;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.card .top-right{position:absolute;top:14px;right:0}
+
+/* character cards */
+.char-card{padding:0;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;border:1px solid var(--rule);background:var(--paper2)}
+.portrait{aspect-ratio:3/4;background:var(--paper3);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--rule)}
+.portrait img{width:100%;height:100%;object-fit:cover;display:block;filter:grayscale(.25) contrast(1.02)}
+.portrait .ph{font-family:var(--serif);font-size:72px;color:rgba(27,27,25,.12);font-weight:400}
+.char-card .body{padding:10px 14px 14px}
+.char-card h3{font-size:17px}
+.char-card:hover h3{color:var(--red)}
+.char-card .quote{font-size:14px;color:var(--ink-dim);margin-top:6px}
+.char-card .edit-row{position:absolute;top:8px;right:8px;z-index:2}
+.char-card .edit-row .btn{background:var(--paper)}
+
+/* hero — 參考：檔案封面 */
+.hero{display:grid;grid-template-columns:auto 1fr;border:1px solid var(--red);margin:6px 0 10px;position:relative}
+.hero-side{display:flex;border-right:1px solid var(--red)}
+.hero-side div{writing-mode:vertical-rl;transform:rotate(180deg);font-family:var(--mono);font-size:11px;letter-spacing:.18em;padding:22px 9px;border-left:1px solid var(--red);color:var(--ink-dim);text-transform:uppercase;white-space:nowrap}
+.hero-side div:first-child{border-left:none}
+.hero-main{padding:56px 40px 40px}
+.hero .label{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--ink-dim);text-transform:uppercase;margin-bottom:6px}
+.hero .list{font-family:var(--mono);font-size:13px;line-height:1.75;letter-spacing:.04em;max-width:640px;color:var(--ink)}
+.hero .titlebox{display:grid;grid-template-columns:1fr auto;margin:24px -40px 28px -40px;border-top:1px solid var(--red);border-bottom:1px solid var(--red)}
+.hero h1{font-family:var(--sans);font-weight:900;letter-spacing:.12em;font-size:clamp(34px,6.4vw,68px);margin:0;padding:6px 40px 4px;line-height:1.05;margin-top:-.45em;background:transparent}
+.hero .titlebox .cells{display:grid;grid-template-columns:auto auto;border-left:1px solid var(--red);font-family:var(--mono);font-size:12px;letter-spacing:.08em}
+.hero .titlebox .cells span{padding:10px 18px;border-right:1px solid var(--red);display:flex;align-items:center}
+.hero .titlebox .cells span:last-child{border-right:none}
+.hero .tagline{font-family:var(--mono);font-style:italic;font-size:13px;color:var(--ink-dim);letter-spacing:.14em;text-transform:uppercase;margin:-12px 0 6px}
+.hero .intro{max-width:620px;color:var(--ink-dim);font-size:16px;margin-top:22px}
+.hero .intro p{margin:0 0 .4em}
+.hero .years{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--red);margin-top:30px;max-width:520px;font-family:var(--mono);font-size:12px}
+.hero .years span{padding:8px 14px;letter-spacing:.14em;border-right:1px solid var(--red)}
+.hero .years span:last-child{border-right:none}
+.hero .stamp{position:absolute;right:24px;bottom:22px;border:1.5px solid var(--sage);color:var(--sage);font-family:var(--mono);font-size:11px;letter-spacing:.14em;padding:4px 10px;transform:rotate(-4deg);text-transform:uppercase;background:rgba(241,239,234,.6)}
+@media (max-width:760px){.hero-side{display:none}.hero{grid-template-columns:1fr}.hero-main{padding:24px 20px}.hero .titlebox{margin-left:-20px;margin-right:-20px;grid-template-columns:1fr}.hero h1{padding:6px 20px}.hero .titlebox .cells{border-left:none;border-top:1px solid var(--red)}.hero .stamp{display:none}}
+
+/* duo — 分類表樣式 */
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:10px}
+.duo .char-card{flex-direction:row;background:transparent;border:none;border-top:1px solid var(--rule);padding-top:16px}
+.duo .portrait{width:38%;aspect-ratio:3/4;min-height:0;flex:none;border:1px solid var(--rule)}
+.duo .body{padding:0 0 0 22px;display:flex;flex-direction:column;flex:1;min-width:0}
+.duo .idx{font-family:var(--mono);font-size:12px;color:var(--mute);display:flex;justify-content:space-between;margin-bottom:10px}
+.duo h3{font-size:26px;font-weight:900}
+.duo dl.fields{margin:12px 0 0;font-size:14px}
+@media (max-width:760px){.duo{grid-template-columns:1fr}}
+
+/* list rows — 編號表格 */
+.rows{display:flex;flex-direction:column;counter-reset:r;border-top:1px solid var(--rule)}
+.row{display:grid;grid-template-columns:44px 110px 1fr auto;gap:14px;align-items:baseline;padding:12px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.row::before{counter-increment:r;content:counter(r,decimal-leading-zero);font-family:var(--mono);font-size:12px;color:var(--ink)}
+.row:hover .t b{color:var(--red)}
+.row .date{font-family:var(--mono);color:var(--mute);font-size:12px}
+.row .t b{font-family:var(--sans);font-weight:600;letter-spacing:.03em}
+.row .t .muted{font-family:var(--mono);font-size:12px;margin-left:10px}
+@media (max-width:600px){.row{grid-template-columns:34px 1fr}.row .date{display:none}.row>span:last-child{grid-column:2}}
+
+/* timeline */
+.timeline{position:relative;margin-left:0;padding-left:0;border-top:1px solid var(--rule)}
+.timeline::before{display:none}
+.tl-item{display:grid;grid-template-columns:180px 1fr;gap:20px;margin:0;border-bottom:1px solid var(--line);padding:4px 0}
+.tl-item::before{display:none}
+.tl-item .when{font-family:var(--mono);color:var(--ink);letter-spacing:.06em;font-size:13px;padding-top:18px;position:relative;padding-left:18px}
+.tl-item .when::before{content:"";position:absolute;left:0;top:25px;width:7px;height:7px;background:var(--red)}
+.tl-item .card{margin-top:0;border-top:none}
+@media (max-width:600px){.tl-item{grid-template-columns:1fr;gap:0}.tl-item .card{padding-top:4px}}
+
+/* prose / markdown */
+.prose{line-height:1.95;font-size:16.5px}
+.prose p{margin:0 0 1em}
+.prose h1,.prose h2,.prose h3{font-family:var(--sans);letter-spacing:.04em;margin:1.7em 0 .6em;font-weight:700;line-height:1.4}
+.prose h1{font-size:22px}.prose h2{font-size:19px}
+.prose h3{font-size:13px;font-family:var(--mono);font-weight:500;letter-spacing:.14em;color:var(--red);text-transform:uppercase}
+.prose strong{font-weight:700}
+.prose blockquote{margin:1.2em 0;padding:2px 0 2px 18px;border-left:3px solid var(--gold-soft);color:var(--ink-dim)}
+.prose hr{border:none;border-top:1px solid var(--rule);margin:2em 0;position:relative;overflow:visible}
+.prose hr::after{content:"§";position:absolute;left:50%;top:-.8em;transform:translateX(-50%);background:var(--paper);padding:0 10px;color:var(--red);font-family:var(--serif)}
+.prose ul,.prose ol{padding-left:1.3em;margin:0 0 1em}
+.prose li::marker{color:var(--red)}
+.prose code{font-family:var(--mono);background:var(--paper3);padding:1px 5px;font-size:.85em}
+.prose img{margin:.5em 0;border:1px solid var(--rule)}
+.prose .spoiler{background:var(--ink);color:transparent;cursor:pointer;transition:.2s}
+.prose .spoiler.open{background:transparent;color:inherit;box-shadow:inset 0 -1px var(--red)}
+.reader{max-width:740px;margin:0 auto}
+.reader h1{font-family:var(--sans);font-size:34px;letter-spacing:.04em;margin:0 0 12px;font-weight:900;line-height:1.3}
+.reader .head{border-top:3px solid var(--ink);border-bottom:1px solid var(--rule);padding:18px 0 16px;margin-bottom:6px}
+.reader .byline{font-family:var(--mono);color:var(--ink-dim);font-size:12px;letter-spacing:.06em;display:grid;grid-template-columns:auto 1fr;gap:4px 18px}
+.reader .byline dt{color:var(--mute);text-transform:uppercase}
+.reader .byline dd{margin:0}
+.reader .chips{margin:12px 0 0}
+.reader .prose{font-size:17.5px;padding:28px 0}
+.reader .orn{text-align:center;color:var(--red);font-family:var(--mono);letter-spacing:.6em;margin:18px 0 22px;font-size:12px}
+.reader .nav{display:flex;justify-content:space-between;gap:10px;font-family:var(--mono);font-size:12px;border-top:1px solid var(--rule);padding-top:12px}
+
+/* char detail */
+.char-detail{display:grid;grid-template-columns:300px 1fr;gap:44px}
+.char-detail .portrait{border:1px solid var(--rule)}
+@media (max-width:800px){.char-detail{grid-template-columns:1fr}.char-detail .portrait{max-width:320px}}
+.char-detail h1{font-family:var(--sans);font-weight:900}
+dl.fields{display:grid;grid-template-columns:auto 1fr;gap:0 22px;margin:18px 0;padding:0;border-top:1px solid var(--rule)}
+dl.fields dt,dl.fields dd{padding:8px 0;border-bottom:1px solid var(--line);margin:0}
+dl.fields dt{color:var(--ink);font-size:15px;letter-spacing:.06em;white-space:nowrap}
+dl.fields dt::after{content:"："}
+dl.fields dd{color:var(--ink-dim)}
+
+/* paro */
+.paro-card{padding:0;overflow:hidden;cursor:pointer;border:1px solid var(--rule);background:var(--paper2)}
+.paro-card .cover{height:120px;background:var(--paper3);position:relative;overflow:hidden;border-bottom:1px solid var(--rule)}
+.paro-card .cover::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--accent,var(--red))}
+.paro-card .cover img{width:100%;height:100%;object-fit:cover;filter:grayscale(.3)}
+.paro-card .body{padding:12px 16px 16px}
+.paro-head{padding:26px 30px 26px 34px;margin-bottom:28px;background:var(--paper2);border:1px solid var(--rule);position:relative}
+.paro-head::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--accent,var(--red))}
+.paro-head h1{margin:4px 0 0;font-family:var(--sans);font-size:32px;letter-spacing:.04em;font-weight:900}
+
+/* commission */
+.swatches{display:flex;flex-wrap:wrap;gap:0;margin:12px 0;border:1px solid var(--rule);width:fit-content;max-width:100%}
+.sw{display:flex;flex-direction:column;font-family:var(--mono);font-size:11px;color:var(--ink-dim);cursor:pointer;border-right:1px solid var(--rule);width:96px}
+.sw:last-child{border-right:none}
+.sw i{height:42px;display:block;border-bottom:1px solid var(--rule)}
+.sw span,.sw{line-height:1.4}
+.sw b{font-weight:400;padding:4px 6px 0;color:var(--ink);font-family:var(--sans)}
+.sw em{font-style:normal;padding:0 6px 4px;color:var(--mute)}
+.sw:hover b{color:var(--red)}
+.sheet{display:grid;grid-template-columns:220px 1fr;gap:28px}
+@media (max-width:700px){.sheet{grid-template-columns:1fr}}
+.sheet .portrait{border:1px solid var(--rule)}
+.dodont{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:12px;border:1px solid var(--rule)}
+.dodont>div{padding:10px 14px;font-size:14px}
+.dodont>div:first-child{border-right:1px solid var(--rule)}
+.dodont h4{margin:0 0 4px;font-family:var(--mono);font-weight:500;font-size:11px;letter-spacing:.15em}
+@media (max-width:600px){.dodont{grid-template-columns:1fr}.dodont>div:first-child{border-right:none;border-bottom:1px solid var(--rule)}}
+.status{font-family:var(--mono);font-size:11px;padding:0 7px;letter-spacing:.05em}
+.st-構思中{border:1px solid var(--line);color:var(--mute)}
+.st-洽談中{border:1px solid var(--gold);color:var(--gold)}
+.st-進行中{border:1px solid var(--sage);color:var(--sage)}
+.st-已完成{background:var(--ink);color:var(--paper);border:1px solid var(--ink)}
+.comm-img{aspect-ratio:4/3;background:var(--paper3);overflow:hidden;margin:0 0 12px;display:flex;align-items:center;justify-content:center;color:var(--line);font-size:36px;border:1px solid var(--rule)}
+.comm-img img{width:100%;height:100%;object-fit:cover}
+
+/* empty */
+.empty{text-align:center;padding:46px 20px;color:var(--mute);border:1px dashed var(--line);font-family:var(--mono);font-size:13px;letter-spacing:.05em}
+.empty svg{width:40px;height:40px;opacity:.5;margin-bottom:8px}
+
+/* modal */
+.modal-bg{position:fixed;inset:0;background:rgba(27,27,25,.45);z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto}
+.modal{background:var(--paper2);border:1px solid var(--ink);width:100%;max-width:720px;padding:26px 30px;box-shadow:8px 8px 0 rgba(27,27,25,.12)}
+.modal h2{margin:0 0 20px;font-family:var(--sans);font-size:20px;letter-spacing:.06em;font-weight:700;padding-bottom:10px;border-bottom:1px solid var(--rule)}
+.modal.sm{max-width:420px}
+.f{margin-bottom:16px}
+.f label{display:block;font-family:var(--mono);font-size:11px;color:var(--ink-dim);letter-spacing:.12em;margin-bottom:4px;text-transform:uppercase}
+.f .hint{font-size:12px;color:var(--mute);margin-top:3px}
+.f input[type=text],.f input[type=number],.f input[type=date],.f input[type=url],.f select,.f textarea{width:100%;background:var(--paper);border:1px solid var(--line);border-radius:0;padding:8px 10px;outline:none;font-family:var(--serif)}
+.f input:focus,.f select:focus,.f textarea:focus{border-color:var(--ink)}
+.f textarea{min-height:90px;resize:vertical;line-height:1.7}
+.f textarea.tall{min-height:280px}
+.f .checks{display:flex;flex-wrap:wrap;gap:6px}
+.f .checks label{display:inline-flex;align-items:center;gap:4px;margin:0;color:var(--ink);font-family:var(--sans);font-size:13px;border:1px solid var(--line);padding:2px 10px;cursor:pointer;letter-spacing:0;text-transform:none}
+.f .checks input{accent-color:var(--red)}
+.f .img-row{display:flex;gap:8px}
+.f .img-row input{flex:1}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
+@media (max-width:560px){.f2{grid-template-columns:1fr}}
+.modal-foot{display:flex;justify-content:space-between;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--rule)}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:7px 18px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;z-index:60;opacity:0;transition:.25s;pointer-events:none}
+.toast.on{opacity:1}
+.banner{border:1px dashed var(--gold);color:var(--gold);font-family:var(--mono);font-size:12px;padding:8px 14px;margin-bottom:26px;letter-spacing:.03em}
+footer{max-width:1140px;width:calc(100% - 40px);margin:0 auto;padding:18px 0 40px;color:var(--mute);font-size:11px;font-family:var(--mono);letter-spacing:.2em;text-transform:uppercase;border-top:1px solid var(--rule);display:flex;justify-content:space-between}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand" data-go="home">
+      <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1">
+        <ellipse cx="20" cy="22" rx="15" ry="16" stroke="#1b1b19"/>
+        <ellipse cx="20" cy="23.5" rx="10.5" ry="11.5" stroke="#9c8758"/>
+        <ellipse cx="20" cy="25" rx="6" ry="7" stroke="#738270"/>
+        <circle cx="20" cy="26" r="2.2" fill="#ad3328" stroke="none"/>
+      </svg>
+      <b id="brandName">沙蟲海珀</b>
+    </div>
+    <nav class="main" id="nav">
+      <a data-go="home" data-n="00">首頁</a>
+      <a data-go="lore" data-n="01">設定</a>
+      <a data-go="stories" data-n="02">故事</a>
+      <a data-go="paro" data-n="03">PARO</a>
+      <a data-go="comm" data-n="04">委託</a>
+    </nav>
+    <div class="auth" id="auth"></div>
+  </div>
+</header>
+
+<main id="app"></main>
+<footer id="foot">沙蟲海珀</footer>
+<div id="modalRoot"></div>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+/* ============================================================
+   連線設定放在同資料夾的 config.js（firebaseConfig、OWNER_EMAIL）。
+   之後更新網站只要換掉這個 index.html，config.js 不用動。
+   找不到 config.js 或還沒填好時，網站會自動進入「預覽模式」。
+   ============================================================ */
+let FIREBASE_CONFIG = null, OWNER_EMAIL = '';
+async function loadConfig(){
+  try{
+    const c = await import('./config.js');
+    const fc = c.firebaseConfig;
+    const filled = fc && fc.apiKey && fc.projectId && !/請貼上|你的專案/.test(fc.apiKey + fc.projectId);
+    if(filled){ FIREBASE_CONFIG = fc; OWNER_EMAIL = String(c.OWNER_EMAIL||'').trim(); }
+  }catch(e){ console.info('config.js 未載入，使用預覽模式'); }
+}
+
+const COLS = ['chars','events','lore','stories','paros','sheets','comms'];
+const LS_KEY = 'hippocampus-site-v1';
+const DB = { meta:{}, chars:[], events:[], lore:[], stories:[], paros:[], sheets:[], comms:[] };
+let store = null, user = null, mode = 'local', ready = false;
+const ui = { tab:{}, storyQ:'', storyScope:'', storyType:'', commTab:'sheets' };
+
+/* ---------- utils ---------- */
+const $ = s => document.querySelector(s);
+const uid = () => Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-3);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const today = () => new Date().toISOString().slice(0,10);
+const byOrder = (a,b) => (Number(a.order)||999) - (Number(b.order)||999) || String(a.name||a.title||'').localeCompare(String(b.name||b.title||''),'zh-Hant');
+const bySort = (a,b) => String(a.sort||'').localeCompare(String(b.sort||''),undefined,{numeric:true}) || String(a.when||'').localeCompare(String(b.when||''));
+const byDateDesc = (a,b) => String(b.date||'').localeCompare(String(a.date||''));
+const lines = s => String(s||'').split('\n').map(x=>x.trim()).filter(Boolean);
+const tagsOf = s => String(s||'').split(/[,，、]/).map(x=>x.trim()).filter(Boolean);
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('on'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('on'),1800); }
+
+const canEdit = () => mode==='local' || (!!user && (
+  (OWNER_EMAIL && user.email===OWNER_EMAIL) || (DB.meta.editors||[]).includes(user.email)));
+const isOwner = () => mode==='local' || (!!user && OWNER_EMAIL && user.email===OWNER_EMAIL);
+
+function scopeName(s){ if(!s||s==='main') return '霍洛伊本家'; const p=DB.paros.find(x=>x.id===s); return p? p.name : '（已刪除的 PARO）'; }
+function scopeOptions(){ return [['main','霍洛伊本家'], ...DB.paros.slice().sort(byOrder).map(p=>[p.id,'PARO・'+p.name])]; }
+function charName(id){ const c=DB.chars.find(x=>x.id===id); return c? c.name : null; }
+
+/* ---------- 輕量 markdown ---------- */
+function inline(s){
+  return s
+    .replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g,'<img alt="$1" src="$2" loading="lazy">')
+    .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>')
+    .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*([^*]+)\*/g,'<em>$1</em>')
+    .replace(/~~([^~]+)~~/g,'<del>$1</del>')
+    .replace(/\|\|([^|]+)\|\|/g,'<span class="spoiler" title="點擊顯示">$1</span>')
+    .replace(/`([^`]+)`/g,'<code>$1</code>');
+}
+function md(src){
+  if(!src) return '';
+  const L = esc(src).split('\n'); let out=[], para=[], list=null, quote=[];
+  const flushP=()=>{ if(para.length){ out.push('<p>'+para.map(inline).join('<br>')+'</p>'); para=[]; } };
+  const flushL=()=>{ if(list){ out.push(`<${list.t}>`+list.items.map(i=>'<li>'+inline(i)+'</li>').join('')+`</${list.t}>`); list=null; } };
+  const flushQ=()=>{ if(quote.length){ out.push('<blockquote>'+quote.map(inline).join('<br>')+'</blockquote>'); quote=[]; } };
+  const flush=()=>{flushP();flushL();flushQ();};
+  for(const raw of L){
+    const l = raw.replace(/\s+$/,'');
+    let m;
+    if(!l.trim()){ flush(); continue; }
+    if(/^(-{3,}|\*{3,}|◇{3,})$/.test(l.trim())){ flush(); out.push('<hr>'); continue; }
+    if(m=l.match(/^(#{1,3})\s+(.*)/)){ flush(); out.push(`<h${m[1].length}>${inline(m[2])}</h${m[1].length}>`); continue; }
+    if(m=l.match(/^&gt;\s?(.*)/)){ flushP();flushL(); quote.push(m[1]); continue; }
+    if(m=l.match(/^\s*[-*・]\s+(.*)/)){ flushP();flushQ(); if(!list||list.t!=='ul'){flushL(); list={t:'ul',items:[]};} list.items.push(m[1]); continue; }
+    if(m=l.match(/^\s*\d+[.)]\s+(.*)/)){ flushP();flushQ(); if(!list||list.t!=='ol'){flushL(); list={t:'ol',items:[]};} list.items.push(m[1]); continue; }
+    flushL();flushQ(); para.push(l);
+  }
+  flush(); return out.join('');
+}
+document.addEventListener('click',e=>{ const s=e.target.closest('.spoiler'); if(s) s.classList.toggle('open'); });
+
+/* ---------- 圖片 ---------- */
+function imgTag(src, fallbackText, cls=''){
+  const mono = `<span class="ph">${esc((fallbackText||'◦').trim().slice(0,1))}</span>`;
+  if(!src) return mono;
+  return `<img class="${cls}" src="${esc(src)}" alt="" loading="lazy" onerror="this.outerHTML='${mono.replace(/'/g,"\\'").replace(/"/g,'&quot;')}'">`;
+}
+function compressImage(file, max=900){
+  return new Promise((res,rej)=>{
+    const fr=new FileReader();
+    fr.onload=()=>{ const im=new Image(); im.onload=()=>{
+      const k=Math.min(1,max/Math.max(im.width,im.height)); const c=document.createElement('canvas');
+      c.width=Math.round(im.width*k); c.height=Math.round(im.height*k);
+      c.getContext('2d').drawImage(im,0,0,c.width,c.height); res(c.toDataURL('image/jpeg',.82)); };
+      im.onerror=rej; im.src=fr.result; };
+    fr.onerror=rej; fr.readAsDataURL(file);
+  });
+}
+
+/* ============================================================
+   表單欄位定義
+   ============================================================ */
+const STORY_TYPES = ['交流','文章','短篇','草稿','其他'];
+const COMM_STATUS = ['構思中','洽談中','進行中','已完成'];
+const SCHEMA = {
+  chars: { title:'角色', fields:[
+    {k:'name',l:'名字',req:1,half:1},{k:'nameEn',l:'外文名／別名',half:1},
+    {k:'scope',l:'所屬',t:'scope',half:1},{k:'order',l:'排序（數字小的在前）',t:'number',half:1},
+    {k:'image',l:'立繪／頭像',t:'image'},
+    {k:'quote',l:'一句話／台詞'},
+    {k:'fields',l:'基本資料',t:'textarea',hint:'一行一項，格式「項目：內容」，例如「年齡：16」'},
+    {k:'profile',l:'詳細設定',t:'md',tall:1},
+    {k:'tags',l:'標籤',hint:'用逗號分隔'},
+  ]},
+  events: { title:'時間軸事件', fields:[
+    {k:'when',l:'時間（顯示用）',req:1,half:1,hint:'例：四年級・十月 / 12 歲 / 1999'},
+    {k:'sort',l:'排序鍵',half:1,hint:'依此排列，例：2018-10 或 0405'},
+    {k:'scope',l:'所屬',t:'scope',half:1},
+    {k:'title',l:'事件',req:1,half:1},
+    {k:'chars',l:'相關角色',t:'chars'},
+    {k:'desc',l:'描述',t:'md'},
+  ]},
+  lore: { title:'世界觀條目', fields:[
+    {k:'title',l:'標題',req:1,half:1},{k:'category',l:'分類',half:1,hint:'例：學院、魔法、種族、地理'},
+    {k:'scope',l:'所屬',t:'scope',half:1},{k:'order',l:'排序',t:'number',half:1},
+    {k:'content',l:'內容',t:'md',tall:1},
+  ]},
+  stories: { title:'故事', fields:[
+    {k:'title',l:'標題',req:1},
+    {k:'type',l:'類型',t:'select',opts:STORY_TYPES,half:1},{k:'scope',l:'所屬',t:'scope',half:1},
+    {k:'author',l:'作者／參與者',half:1},{k:'date',l:'日期',t:'date',half:1},
+    {k:'chars',l:'登場角色',t:'chars'},
+    {k:'summary',l:'摘要',t:'textarea'},
+    {k:'link',l:'原文連結（噗浪等，可留空）',t:'url'},
+    {k:'tags',l:'標籤',hint:'用逗號分隔'},
+    {k:'content',l:'正文',t:'md',tall:1},
+  ]},
+  paros: { title:'PARO', fields:[
+    {k:'name',l:'PARO 名稱',req:1,half:1},{k:'nameEn',l:'副標／外文名',half:1},
+    {k:'color',l:'主題色',t:'color',half:1},{k:'order',l:'排序',t:'number',half:1},
+    {k:'cover',l:'封面圖',t:'image'},
+    {k:'summary',l:'一句話簡介',t:'textarea'},
+    {k:'content',l:'世界觀概述',t:'md',tall:1},
+  ]},
+  sheets: { title:'委託用設定', fields:[
+    {k:'name',l:'角色／項目名稱',req:1,half:1},{k:'charId',l:'對應角色',t:'charSelect',half:1},
+    {k:'image',l:'參考主圖',t:'image'},
+    {k:'colors',l:'配色',t:'textarea',hint:'一行一色：「#色碼 名稱」，例如「#ad3328 瞳色」'},
+    {k:'appearance',l:'外觀重點',t:'md'},
+    {k:'dos',l:'請務必',t:'md',half:1},{k:'donts',l:'請避免',t:'md',half:1},
+    {k:'refs',l:'參考圖連結',t:'textarea',hint:'一行一個網址'},
+    {k:'order',l:'排序',t:'number'},
+  ]},
+  comms: { title:'委託紀錄', fields:[
+    {k:'title',l:'委託名稱',req:1},
+    {k:'artist',l:'繪師／寫手',half:1},{k:'status',l:'狀態',t:'select',opts:COMM_STATUS,half:1},
+    {k:'date',l:'日期',t:'date',half:1},{k:'price',l:'價格／備註',half:1},
+    {k:'chars',l:'角色',t:'chars'},
+    {k:'image',l:'成品／草稿圖',t:'image'},
+    {k:'link',l:'連結',t:'url'},
+    {k:'notes',l:'內容需求與筆記',t:'md'},
+  ]},
+};
+
+/* ---------- modal ---------- */
+function openModal(html, cls=''){
+  $('#modalRoot').innerHTML = `<div class="modal-bg"><div class="modal ${cls}">${html}</div></div>`;
+  const bg=$('#modalRoot .modal-bg');
+  bg.addEventListener('mousedown',e=>{ if(e.target===bg) closeModal(); });
+  return $('#modalRoot .modal');
+}
+function closeModal(){ $('#modalRoot').innerHTML=''; }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
+
+function askConfirm(msg){
+  return new Promise(res=>{
+    const m=openModal(`<h2>確認</h2><p>${esc(msg)}</p><div class="modal-foot"><span></span><div><button class="btn ghost" data-a="n">取消</button> <button class="btn pri" data-a="y">確定</button></div></div>`,'sm');
+    m.addEventListener('click',e=>{ const a=e.target.dataset.a; if(a){ closeModal(); res(a==='y'); } });
+  });
+}
+
+function fieldHTML(f, v){
+  const id='f_'+f.k, val=v??'';
+  const lab=`<label for="${id}">${esc(f.l)}${f.req?' *':''}</label>`, hint=f.hint?`<div class="hint">${esc(f.hint)}</div>`:'';
+  let input='';
+  switch(f.t){
+    case 'textarea': input=`<textarea id="${id}">${esc(val)}</textarea>`; break;
+    case 'md': input=`<textarea id="${id}" class="${f.tall?'tall':''}" placeholder="支援：# 標題、**粗體**、*斜體*、> 引用、- 清單、--- 分隔線、||防雷||、[文字](網址)">${esc(val)}</textarea>`; break;
+    case 'number': input=`<input type="number" id="${id}" value="${esc(val)}">`; break;
+    case 'date': input=`<input type="date" id="${id}" value="${esc(val)}">`; break;
+    case 'url': input=`<input type="text" id="${id}" value="${esc(val)}" placeholder="https://">`; break;
+    case 'color': input=`<input type="text" id="${id}" value="${esc(val||'#ad3328')}" placeholder="#ad3328">`; break;
+    case 'select': input=`<select id="${id}">${f.opts.map(o=>`<option ${o===val?'selected':''}>${esc(o)}</option>`).join('')}</select>`; break;
+    case 'scope': input=`<select id="${id}">${scopeOptions().map(([k,n])=>`<option value="${k}" ${k===(val||'main')?'selected':''}>${esc(n)}</option>`).join('')}</select>`; break;
+    case 'charSelect': input=`<select id="${id}"><option value="">（無）</option>${DB.chars.slice().sort(byOrder).map(c=>`<option value="${c.id}" ${c.id===val?'selected':''}>${esc(c.name)}（${esc(scopeName(c.scope))}）</option>`).join('')}</select>`; break;
+    case 'chars': {
+      const sel=new Set(val||[]);
+      const list=DB.chars.slice().sort(byOrder);
+      input = list.length ? `<div class="checks" id="${id}">${list.map(c=>`<label><input type="checkbox" value="${c.id}" ${sel.has(c.id)?'checked':''}>${esc(c.name)}${c.scope&&c.scope!=='main'?`<span class="muted small">・${esc(scopeName(c.scope))}</span>`:''}</label>`).join('')}</div>` : `<div class="muted small">還沒有角色</div>`;
+      break; }
+    case 'image': input=`<div class="img-row"><input type="text" id="${id}" value="${esc(String(val).startsWith('data:')?'':val)}" data-data="${String(val).startsWith('data:')?'1':''}" placeholder="${String(val).startsWith('data:')?'（已上傳圖片）':'貼上圖片網址，或按右邊上傳'}"><label class="btn sm" style="margin:0">上傳<input type="file" accept="image/*" hidden data-up="${id}"></label>${val?`<button type="button" class="btn sm ghost" data-clr="${id}">清除</button>`:''}</div><div class="hint">上傳的圖會自動縮小後存進資料庫</div>`; break;
+    default: input=`<input type="text" id="${id}" value="${esc(val)}">`;
+  }
+  return `<div class="f" ${f.half?'data-half':''}>${lab}${input}${hint}</div>`;
+}
+
+function openEditor(col, item, preset={}){
+  const sch=SCHEMA[col]; const isNew=!item; const obj = item ? {...item} : {id:uid(), ...preset};
+  if(isNew && col==='stories' && !obj.date) obj.date=today();
+  if(isNew && col==='comms' && !obj.date) obj.date=today();
+  if(isNew && !obj.scope && sch.fields.some(f=>f.t==='scope')) obj.scope='main';
+  const imgData={};
+  sch.fields.filter(f=>f.t==='image').forEach(f=>{ if(String(obj[f.k]||'').startsWith('data:')) imgData[f.k]=obj[f.k]; });
+  // 把 half 欄位兩兩包成一列
+  let html='', buf=[];
+  const flushHalf=()=>{ if(buf.length){ html+=`<div class="f2">${buf.join('')}</div>`; buf=[]; } };
+  for(const f of sch.fields){ const h=fieldHTML(f,obj[f.k]); if(f.half){ buf.push(h); if(buf.length===2) flushHalf(); } else { flushHalf(); html+=h; } }
+  flushHalf();
+  const m=openModal(`<h2>${isNew?'新增':'編輯'}${sch.title}</h2><form id="edForm">${html}
+    <div class="modal-foot"><div>${!isNew?'<button type="button" class="btn danger" data-del>刪除</button>':''}</div>
+    <div><button type="button" class="btn ghost" data-cancel>取消</button> <button class="btn pri" type="submit">儲存</button></div></div></form>`);
+  m.querySelectorAll('[data-up]').forEach(inp=>inp.addEventListener('change',async()=>{
+    const file=inp.files[0]; if(!file) return; const k=inp.dataset.up.slice(2);
+    try{ imgData[k]=await compressImage(file); const t=m.querySelector('#'+inp.dataset.up); t.value=''; t.placeholder='（已上傳圖片）'; toast('圖片已載入'); }catch{ toast('圖片讀取失敗'); }
+  }));
+  m.querySelectorAll('[data-clr]').forEach(b=>b.addEventListener('click',()=>{ const k=b.dataset.clr.slice(2); delete imgData[k]; const t=m.querySelector('#'+b.dataset.clr); t.value=''; t.placeholder='貼上圖片網址，或按右邊上傳'; imgData[k]=null; }));
+  m.querySelector('[data-cancel]').onclick=closeModal;
+  const del=m.querySelector('[data-del]');
+  if(del) del.onclick=async()=>{ if(await askConfirm(`確定刪除「${obj.name||obj.title}」？`)){ await store.remove(col,obj.id); toast('已刪除'); if(['chars','paros','stories'].includes(col)) go(col==='chars'?'lore':col==='paros'?'paro':'stories'); } else openEditor(col,item,preset); };
+  m.querySelector('#edForm').addEventListener('submit',async e=>{
+    e.preventDefault();
+    for(const f of sch.fields){
+      const el=m.querySelector('#f_'+f.k);
+      if(f.t==='chars'){ obj[f.k]= el? [...el.querySelectorAll('input:checked')].map(x=>x.value) : []; continue; }
+      if(f.t==='image'){ const typed=el.value.trim(); obj[f.k]= typed || (imgData[f.k]===null? '' : (imgData[f.k]||'')); continue; }
+      if(!el) continue;
+      obj[f.k]= f.t==='number' ? (el.value===''?'':Number(el.value)) : el.value;
+    }
+    const miss=sch.fields.find(f=>f.req && !String(obj[f.k]||'').trim());
+    if(miss){ toast(`請填寫「${miss.l}」`); return; }
+    obj.updatedAt=Date.now(); obj.updatedBy= user?.displayName || user?.email || '';
+    try{ await store.save(col,obj); closeModal(); toast('已儲存'); }
+    catch(err){ console.error(err); toast('儲存失敗：'+(err.code||err.message||'')); }
+  });
+}
+
+/* ============================================================
+   畫面
+   ============================================================ */
+const editBtn = (col,id,extra='') => canEdit()? `<div class="edit-row ${extra}"><button class="btn sm" data-edit="${col}:${id}">編輯</button></div>`:'';
+const addBtn = (col,label,preset) => canEdit()? `<button class="btn" data-add="${col}" ${preset?`data-preset='${esc(JSON.stringify(preset))}'`:''}>＋ ${label}</button>`:'';
+const emptyBox = (msg, btn='') => `<div class="empty"><svg viewBox="0 0 40 40" fill="none" stroke="currentColor"><ellipse cx="20" cy="22" rx="14" ry="15"/><ellipse cx="20" cy="24" rx="8" ry="9"/></svg><div>${msg}</div>${btn?`<div style="margin-top:14px">${btn}</div>`:''}</div>`;
+const pageHead = (num,zh,en,right='') => `<div class="page-head"><div class="num">${num} /</div><h1>${zh}<span class="en">${en}</span></h1><div class="toolbar" style="margin:0">${right}</div></div>`;
+
+function charCard(c){
+  return `<div class="card char-card" data-go="char-${c.id}">
+    ${editBtn('chars',c.id)}
+    <div class="portrait">${imgTag(c.image,c.name)}</div>
+    <div class="body"><h3>${esc(c.name)}</h3>${c.nameEn?`<div class="en">${esc(c.nameEn)}</div>`:''}
+    ${c.quote?`<div class="quote">「${esc(c.quote)}」</div>`:''}</div></div>`;
+}
+function storyRow(s){
+  return `<div class="row" data-go="story-${s.id}"><span class="date">${esc(s.date||'')}</span>
+    <span class="t"><b>${esc(s.title)}</b><span class="muted">${esc(s.author||'')}</span></span>
+    <span><span class="chip sea">${esc(s.type||'')}</span>${s.scope&&s.scope!=='main'?`<span class="chip vein">${esc(scopeName(s.scope))}</span>`:''}</span></div>`;
+}
+function charChips(ids){ return (ids||[]).map(id=>{ const n=charName(id); return n?`<a class="chip vein" data-go="char-${id}">${esc(n)}</a>`:''; }).join(''); }
+
+/* ----- 首頁 ----- */
+function viewHome(){
+  const m=DB.meta;
+  const mains=DB.chars.filter(c=>(c.scope||'main')==='main').sort(byOrder);
+  const duo=mains.slice(0,2);
+  const recent=DB.stories.slice().sort(byDateDesc).slice(0,6);
+  const paros=DB.paros.slice().sort(byOrder);
+  return `
+  <section class="hero">
+    <div class="hero-side"><div>Holloy Academy</div><div>Alt. 21st c. England</div><div>Record No. ${String(DB.stories.length).padStart(3,'0')}</div></div>
+    <div class="hero-main">
+      <div class="titlebox"><h1>${esc(m.title||'沙蟲海珀')}</h1>
+        <div class="cells"><span>${esc(m.subtitle||'達魯 & 丹德里提')}</span><span>${esc(today().replace(/-/g,'.'))}</span></div></div>
+      ${(m.titleEn??'Desert Worm, Drowned Amber')?`<div class="tagline">${esc(m.titleEn??'Desert Worm, Drowned Amber')}</div>`:''}
+      ${m.intro?`<div class="intro prose">${md(m.intro)}</div>`:''}
+      ${canEdit()?`<div style="margin-top:18px"><button class="btn sm ghost" data-settings>✎ 編輯首頁與網站設定</button></div>`:''}
+    </div>
+  </section>
+
+  ${duo.length?`<h2 class="sec">主要角色 <span class="en">Principal subjects</span></h2><div class="duo">${duo.map((c,i)=>{
+      const f=lines(c.fields).map(l=>{ const k=l.search(/[:：]/); return k>0?[l.slice(0,k),l.slice(k+1)]:null; }).filter(Boolean).slice(0,5);
+      return `<div class="card char-card" data-go="char-${c.id}">${editBtn('chars',c.id)}
+      <div class="portrait">${imgTag(c.image,c.name)}</div>
+      <div class="body"><div class="idx"><span>${String(i+1).padStart(2,'0')}</span><span>${esc(c.nameEn||'')}</span></div>
+        <h3>${esc(c.name)}</h3>
+        ${c.quote?`<div class="quote">「${esc(c.quote)}」</div>`:''}
+        ${f.length?`<dl class="fields">${f.map(([k,v])=>`<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>`:''}
+        <div style="margin-top:10px">${tagsOf(c.tags).map(t=>`<span class="chip">${esc(t)}</span>`).join('')}</div>
+      </div></div>`;}).join('')}</div>`:''}
+
+  <h2 class="sec">最近收錄 <span class="en">Recent</span></h2>
+  ${recent.length?`<div class="rows">${recent.map(storyRow).join('')}</div><div style="text-align:right;margin-top:10px"><a data-go="stories" class="small">全部故事 →</a></div>`:emptyBox('還沒有收錄任何故事',addBtn('stories','新增故事'))}
+
+  <h2 class="sec">世界 <span class="en">Worlds</span></h2>
+  <div class="grid g3">
+    <div class="card link" data-go="lore"><h3>霍洛伊本家</h3><div class="en">Holloy Academy</div>
+      <div class="sum" style="margin-top:8px">${DB.lore.filter(x=>(x.scope||'main')==='main').length} 個世界觀條目・${mains.length} 位角色・${DB.events.filter(x=>(x.scope||'main')==='main').length} 個時間軸事件</div></div>
+    ${paros.map(p=>`<div class="card link" data-go="paro-${p.id}" style="border-top:3px solid ${esc(p.color||'#ad3328')}"><h3>${esc(p.name)}</h3>${p.nameEn?`<div class="en">${esc(p.nameEn)}</div>`:''}<div class="sum" style="margin-top:8px">${esc(p.summary||'')}</div></div>`).join('')}
+  </div>`;
+}
+
+/* ----- 共用：某個世界（本家或 PARO）的 世界觀／角色／時間軸 ----- */
+function scopeTabs(scope){
+  const t = ui.tab[scope] || 'world';
+  const tabs=[['world','世界觀'],['chars','角色'],['time','時間軸']];
+  if(scope!=='main') tabs.push(['stories','故事']);
+  return `<div class="tabs" data-scope="${scope}">${tabs.map(([k,n])=>`<button data-tab="${k}" class="${t===k?'on':''}">${n}</button>`).join('')}</div>
+  <div id="scopeBody">${scopeBody(scope,t)}</div>`;
+}
+function scopeBody(scope,t){
+  const inScope = x => (x.scope||'main')===scope;
+  if(t==='world'){
+    const items=DB.lore.filter(inScope).sort(byOrder);
+    const cats=[...new Set(items.map(x=>x.category||'未分類'))];
+    return `<div class="toolbar">${addBtn('lore','新增條目',{scope})}</div>` + (items.length? cats.map(cat=>`
+      <h2 class="sec">${esc(cat)}</h2>
+      <div class="grid" style="gap:14px">${items.filter(x=>(x.category||'未分類')===cat).map(x=>`
+        <div class="card"><div class="top-right">${editBtn('lore',x.id)}</div>
+        <h3>${esc(x.title)}</h3><div class="prose" style="margin-top:8px">${md(x.content)}</div></div>`).join('')}</div>`).join('')
+      : emptyBox('還沒有世界觀條目'));
+  }
+  if(t==='chars'){
+    const items=DB.chars.filter(inScope).sort(byOrder);
+    return `<div class="toolbar">${addBtn('chars','新增角色',{scope})}</div>` + (items.length?`<div class="grid g4">${items.map(charCard).join('')}</div>`:emptyBox('還沒有角色'));
+  }
+  if(t==='time'){
+    const items=DB.events.filter(inScope).sort(bySort);
+    return `<div class="toolbar">${addBtn('events','新增事件',{scope})}</div>` + (items.length?`<div class="timeline">${items.map(e=>`
+      <div class="tl-item"><div class="when">${esc(e.when)}</div>
+        <div class="card"><div class="top-right">${editBtn('events',e.id)}</div>
+          <h3>${esc(e.title)}</h3><div>${charChips(e.chars)}</div>
+          ${e.desc?`<div class="prose" style="margin-top:8px;font-size:15px">${md(e.desc)}</div>`:''}</div></div>`).join('')}</div>`:emptyBox('時間軸是空的'));
+  }
+  if(t==='stories'){
+    const items=DB.stories.filter(inScope).sort(byDateDesc);
+    return `<div class="toolbar">${addBtn('stories','新增故事',{scope})}</div>` + (items.length?`<div class="rows">${items.map(storyRow).join('')}</div>`:emptyBox('這個 PARO 還沒有故事'));
+  }
+  return '';
+}
+
+/* ----- 設定 ----- */
+function viewLore(){ return pageHead('01','設定','Holloy Academy · 霍洛伊本家') + scopeTabs('main'); }
+
+/* ----- 角色詳細 ----- */
+function viewChar(id){
+  const c=DB.chars.find(x=>x.id===id);
+  if(!c) return emptyBox('找不到這個角色');
+  const f=lines(c.fields).map(l=>{ const i=l.search(/[:：]/); return i>0?[l.slice(0,i),l.slice(i+1)]:['',l]; });
+  const evs=DB.events.filter(e=>(e.chars||[]).includes(id)).sort(bySort);
+  const sts=DB.stories.filter(s=>(s.chars||[]).includes(id)).sort(byDateDesc);
+  const sheet=DB.sheets.find(s=>s.charId===id);
+  const back = (c.scope&&c.scope!=='main')? `paro-${c.scope}` : 'lore';
+  return `<div class="toolbar"><a class="btn ghost sm" data-go="${back}">← ${esc(scopeName(c.scope))}</a><span style="flex:1"></span>${canEdit()?`<button class="btn sm" data-edit="chars:${c.id}">編輯角色</button>`:''}</div>
+  <div class="char-detail">
+    <div><div class="portrait">${imgTag(c.image,c.name)}</div>
+      ${sheet?`<div style="margin-top:14px"><a class="btn sm" data-go="comm">委託用設定 →</a></div>`:''}</div>
+    <div>
+      <div class="mono small muted" style="letter-spacing:.14em">FILE ／ ${esc(scopeName(c.scope))}</div>
+      <h1 style="margin:4px 0 0;font-size:36px;letter-spacing:.04em;line-height:1.25">${esc(c.name)}</h1>
+      ${c.nameEn?`<div style="font-family:var(--mono);color:var(--red);font-size:13px;letter-spacing:.08em;margin-top:4px">${esc(c.nameEn)}</div>`:''}
+      ${c.quote?`<div style="margin-top:10px;color:var(--bone-dim)">「${esc(c.quote)}」</div>`:''}
+      ${f.length?`<dl class="fields">${f.map(([k,v])=>`<dt>${esc(k)}</dt><dd>${inline(esc(v))}</dd>`).join('')}</dl>`:''}
+      <div>${tagsOf(c.tags).map(t=>`<span class="chip">${esc(t)}</span>`).join('')}</div>
+      ${c.profile?`<div class="prose" style="margin-top:18px">${md(c.profile)}</div>`:''}
+      ${evs.length?`<h2 class="sec">經歷 <span class="en">Timeline</span></h2><div class="timeline">${evs.map(e=>`<div class="tl-item"><div class="when">${esc(e.when)}</div><div class="card" style="padding:10px 16px"><b>${esc(e.title)}</b>${e.scope&&e.scope!==c.scope?` <span class="chip">${esc(scopeName(e.scope))}</span>`:''}</div></div>`).join('')}</div>`:''}
+      ${sts.length?`<h2 class="sec">登場故事 <span class="en">Stories</span></h2><div class="rows">${sts.map(storyRow).join('')}</div>`:''}
+    </div>
+  </div>`;
+}
+
+/* ----- 故事 ----- */
+function storyFiltered(){
+  const q=ui.storyQ.trim().toLowerCase();
+  return DB.stories.filter(s=>{
+    if(ui.storyScope && (s.scope||'main')!==ui.storyScope) return false;
+    if(ui.storyType && s.type!==ui.storyType) return false;
+    if(q){ const hay=[s.title,s.summary,s.tags,s.author,...(s.chars||[]).map(charName)].join(' ').toLowerCase(); if(!hay.includes(q)) return false; }
+    return true;
+  }).sort(byDateDesc);
+}
+function storyCards(){
+  const list=storyFiltered();
+  if(!list.length) return emptyBox(DB.stories.length?'沒有符合條件的故事':'還沒有收錄任何故事');
+  return `<div class="grid g2">${list.map(s=>`
+    <div class="card link" data-go="story-${s.id}">
+      <div class="top-right">${editBtn('stories',s.id)}</div>
+      <div><span class="chip sea">${esc(s.type||'其他')}</span><span class="chip ${s.scope&&s.scope!=='main'?'vein':''}">${esc(scopeName(s.scope))}</span></div>
+      <h3 style="margin-top:8px">${esc(s.title)}</h3>
+      <div class="meta">${esc(s.date||'')}${s.author?'・'+esc(s.author):''}</div>
+      ${s.summary?`<div class="sum">${esc(s.summary)}</div>`:''}
+      <div style="margin-top:8px">${(s.chars||[]).map(id=>charName(id)).filter(Boolean).map(n=>`<span class="chip vein">${esc(n)}</span>`).join('')}${tagsOf(s.tags).map(t=>`<span class="chip">#${esc(t)}</span>`).join('')}</div>
+    </div>`).join('')}</div>`;
+}
+function viewStories(){
+  return pageHead('02','故事','Stories & Exchanges', addBtn('stories','新增故事')) + `
+  <div class="toolbar">
+    <input id="sq" type="text" placeholder="搜尋標題、摘要、標籤、角色…" value="${esc(ui.storyQ)}">
+    <select id="ss"><option value="">全部世界</option>${scopeOptions().map(([k,n])=>`<option value="${k}" ${ui.storyScope===k?'selected':''}>${esc(n)}</option>`).join('')}</select>
+    <select id="st"><option value="">全部類型</option>${STORY_TYPES.map(t=>`<option ${ui.storyType===t?'selected':''}>${t}</option>`).join('')}</select>
+  </div><div id="storyList">${storyCards()}</div>`;
+}
+function viewStory(id){
+  const s=DB.stories.find(x=>x.id===id);
+  if(!s) return emptyBox('找不到這篇故事');
+  const list=DB.stories.slice().sort(byDateDesc); const i=list.findIndex(x=>x.id===id);
+  const prev=list[i+1], next=list[i-1];
+  return `<div class="toolbar"><a class="btn ghost sm" data-go="stories">← 故事</a><span style="flex:1"></span>${canEdit()?`<button class="btn sm" data-edit="stories:${s.id}">編輯</button>`:''}</div>
+  <article class="reader">
+    <div class="head">
+      <div class="mono small" style="color:var(--red);letter-spacing:.14em;margin-bottom:8px">${esc(s.type||'')} ／ ${esc(scopeName(s.scope))}</div>
+      <h1>${esc(s.title)}</h1>
+      <dl class="byline">${s.author?`<dt>Author</dt><dd>${esc(s.author)}</dd>`:''}${s.date?`<dt>Date</dt><dd>${esc(s.date)}</dd>`:''}</dl>
+      <div class="chips">${charChips(s.chars)}${tagsOf(s.tags).map(t=>`<span class="chip">#${esc(t)}</span>`).join('')}</div>
+    </div>
+    ${s.summary?`<blockquote class="prose" style="margin:18px 0;padding:2px 0 2px 18px;border-left:3px solid var(--sage);color:var(--ink-dim);font-size:15px">${esc(s.summary)}</blockquote>`:''}
+    ${s.link?`<div style="margin-bottom:10px"><a href="${esc(s.link)}" target="_blank" rel="noopener" class="btn sm">原文連結 ↗</a></div>`:''}
+    <div class="prose">${md(s.content)||'<p class="muted">（尚無正文）</p>'}</div>
+    <div class="orn">— END OF RECORD —</div>
+    <div class="nav">
+      <span>${prev?`<a data-go="story-${prev.id}">← ${esc(prev.title)}</a>`:''}</span>
+      <span>${next?`<a data-go="story-${next.id}">${esc(next.title)} →</a>`:''}</span></div>
+  </article>`;
+}
+
+/* ----- PARO ----- */
+function viewParos(){
+  const ps=DB.paros.slice().sort(byOrder);
+  return pageHead('03','PARO 總覽','Parallel Worlds', addBtn('paros','新增 PARO')) +
+    (ps.length?`<div class="grid g3">${ps.map(p=>{
+      const n={c:DB.chars.filter(x=>x.scope===p.id).length, s:DB.stories.filter(x=>x.scope===p.id).length};
+      return `<div class="card paro-card" data-go="paro-${p.id}" style="--accent:${esc(p.color||'#ad3328')}">
+        ${editBtn('paros',p.id).replace('edit-row','edit-row" style="position:absolute;top:10px;right:10px;z-index:2')}
+        <div class="cover">${p.cover?imgTag(p.cover,''):''}</div>
+        <div class="body"><h3>${esc(p.name)}</h3>${p.nameEn?`<div class="en">${esc(p.nameEn)}</div>`:''}
+        <div class="sum" style="margin-top:6px">${esc(p.summary||'')}</div>
+        <div class="meta" style="margin:8px 0 0">${n.c} 位角色・${n.s} 篇故事</div></div></div>`; }).join('')}</div>`
+    : emptyBox('還沒有建立任何 PARO', addBtn('paros','新增 PARO')));
+}
+function viewParo(id){
+  const p=DB.paros.find(x=>x.id===id);
+  if(!p) return emptyBox('找不到這個 PARO');
+  return `<div class="toolbar"><a class="btn ghost sm" data-go="paro">← PARO 總覽</a><span style="flex:1"></span>${canEdit()?`<button class="btn sm" data-edit="paros:${p.id}">編輯 PARO</button>`:''}</div>
+  <div class="paro-head" style="--accent:${esc(p.color||'#ad3328')}">
+    <div class="mono small muted" style="letter-spacing:.2em">PARALLEL WORLD</div>
+    <h1>${esc(p.name)}</h1>${p.nameEn?`<div style="font-family:var(--mono);color:var(--ink-dim);font-size:13px;letter-spacing:.08em">${esc(p.nameEn)}</div>`:''}
+    ${p.summary?`<div style="margin-top:10px;color:var(--bone-dim)">${esc(p.summary)}</div>`:''}
+  </div>
+  ${p.content?`<div class="card prose" style="margin-bottom:28px">${md(p.content)}</div>`:''}
+  ${scopeTabs(p.id)}`;
+}
+
+/* ----- 委託 ----- */
+function viewComm(){
+  const t=ui.commTab;
+  const head = pageHead('04','委託設定','Commissions');
+  const tabs = `<div class="tabs" id="commTabs"><button data-ct="sheets" class="${t==='sheets'?'on':''}">委託用設定</button><button data-ct="log" class="${t==='log'?'on':''}">委託紀錄</button></div>`;
+  if(t==='sheets'){
+    const ss=DB.sheets.slice().sort(byOrder);
+    return head+tabs+`<div class="toolbar">${addBtn('sheets','新增委託用設定')}<span class="muted small">給繪師／寫手看的外觀重點與配色，點色票可複製色碼</span></div>`+
+     (ss.length? `<div class="grid" style="gap:20px">${ss.map(s=>{
+       const cols=lines(s.colors).map(l=>{ const m=l.match(/(#[0-9a-fA-F]{3,8})\s*(.*)/); return m?[m[1],m[2]]:null; }).filter(Boolean);
+       const refs=lines(s.refs);
+       return `<div class="card"><div class="top-right">${editBtn('sheets',s.id)}</div>
+        <div class="sheet"><div><div class="portrait" style="border-radius:var(--r)">${imgTag(s.image,s.name)}</div></div>
+        <div><h3 style="font-size:22px">${esc(s.name)}</h3>${s.charId&&charName(s.charId)?`<a class="small" data-go="char-${s.charId}">角色頁 →</a>`:''}
+          ${cols.length?`<div class="swatches">${cols.map(([h,n])=>`<span class="sw" data-copy="${esc(h)}"><i style="background:${esc(h)}"></i><b>${esc(n||'—')}</b><em>${esc(h.toUpperCase())}</em></span>`).join('')}</div>`:''}
+          ${s.appearance?`<div class="prose" style="font-size:15px">${md(s.appearance)}</div>`:''}
+          ${(s.dos||s.donts)?`<div class="dodont"><div><h4 style="color:var(--vein)">請務必</h4><div class="prose">${md(s.dos)}</div></div><div><h4 style="color:var(--sea-soft)">請避免</h4><div class="prose">${md(s.donts)}</div></div></div>`:''}
+          ${refs.length?`<div style="margin-top:12px" class="small">參考圖：${refs.map((r,i)=>`<a href="${esc(r)}" target="_blank" rel="noopener" class="chip">參考 ${i+1} ↗</a>`).join('')}</div>`:''}
+        </div></div></div>`; }).join('')}</div>` : emptyBox('還沒有委託用設定'));
+  }
+  const cs=DB.comms.slice().sort(byDateDesc);
+  return head+tabs+`<div class="toolbar">${addBtn('comms','新增委託紀錄')}</div>`+
+    (cs.length?`<div class="grid g3">${cs.map(c=>`<div class="card">
+      <div class="top-right" style="z-index:2">${editBtn('comms',c.id)}</div>
+      <div class="comm-img">${c.image?imgTag(c.image,'◦'):'◦'}</div>
+      <div><span class="status st-${esc(c.status||'構思中')}">${esc(c.status||'構思中')}</span></div>
+      <h3 style="margin-top:8px">${esc(c.title)}</h3>
+      <div class="meta">${esc(c.artist||'')}${c.date?'・'+esc(c.date):''}${c.price?'・'+esc(c.price):''}</div>
+      <div>${charChips(c.chars)}</div>
+      ${c.notes?`<details style="margin-top:8px"><summary class="small muted" style="cursor:pointer">需求與筆記</summary><div class="prose" style="font-size:14px;margin-top:6px">${md(c.notes)}</div></details>`:''}
+      ${c.link?`<div style="margin-top:8px"><a class="small" href="${esc(c.link)}" target="_blank" rel="noopener">連結 ↗</a></div>`:''}
+    </div>`).join('')}</div>`:emptyBox('還沒有委託紀錄'));
+}
+
+/* ----- 網站設定 ----- */
+function openSettings(){
+  const m=DB.meta;
+  const fb = mode==='firebase';
+  const mm=openModal(`<h2>網站設定</h2>
+    <div class="f"><label>網站名稱</label><input type="text" id="s_title" value="${esc(m.title||'沙蟲海珀')}"></div>
+    <div class="f"><label>英文名（標題下的斜體小字）</label><input type="text" id="s_titleEn" value="${esc(m.titleEn??'Desert Worm, Drowned Amber')}"></div>
+    <div class="f"><label>副標</label><input type="text" id="s_sub" value="${esc(m.subtitle||'')}"></div>
+    <div class="f"><label>首頁介紹</label><textarea id="s_intro">${esc(m.intro||'')}</textarea></div>
+    ${fb?`<div class="f"><label>編輯者名單（Google 帳號 email，一行一個）</label><textarea id="s_ed" ${isOwner()?'':'disabled'}>${esc((m.editors||[]).join('\n'))}</textarea>
+      <div class="hint">${isOwner()?'名單內的人登入後可以新增與編輯；其他人只能瀏覽。站主不用填。':'只有站主可以修改編輯者名單。'}</div></div>`:''}
+    <h2 style="font-size:16px;margin-top:24px">備份與搬家</h2>
+    <div class="toolbar"><button class="btn sm" id="s_exp">匯出全部資料</button><button class="btn sm" id="s_imp">匯入資料…</button></div>
+    <div class="hint muted small">匯出會產生一份 JSON（可下載或複製）。預覽模式裡打的內容，部署到 Firebase 後可以用「匯入」搬過去。</div>
+    <div class="modal-foot"><span></span><div><button class="btn ghost" data-x>取消</button> <button class="btn pri" id="s_save">儲存</button></div></div>`);
+  mm.querySelector('[data-x]').onclick=closeModal;
+  mm.querySelector('#s_save').onclick=async()=>{
+    const nm={...DB.meta, title:$('#s_title').value.trim(), titleEn:$('#s_titleEn').value.trim(), subtitle:$('#s_sub').value.trim(), intro:$('#s_intro').value};
+    const ed=$('#s_ed'); if(ed && isOwner()) nm.editors=lines(ed.value);
+    try{ if(fb && !isOwner()){ toast('只有站主能改網站設定'); return; } await store.saveMeta(nm); closeModal(); toast('已儲存'); }catch(e){ toast('儲存失敗：'+(e.code||e.message)); }
+  };
+  mm.querySelector('#s_exp').onclick=()=>{
+    const data={version:1, exportedAt:new Date().toISOString(), meta:{...DB.meta}}; COLS.forEach(c=>data[c]=DB[c]);
+    const json=JSON.stringify(data,null,1);
+    const m2=openModal(`<h2>匯出資料</h2><div class="f"><textarea class="tall" readonly id="ej">${esc(json)}</textarea></div>
+      <div class="modal-foot"><span class="muted small">${(json.length/1024).toFixed(0)} KB</span><div><button class="btn" id="ecopy">複製</button> <button class="btn" id="edl">下載 .json</button> <button class="btn pri" data-x>關閉</button></div></div>`);
+    m2.querySelector('[data-x]').onclick=closeModal;
+    m2.querySelector('#ecopy').onclick=async()=>{ try{ await navigator.clipboard.writeText(json); toast('已複製'); }catch{ $('#ej').select(); toast('請按 Ctrl+C 複製'); } };
+    m2.querySelector('#edl').onclick=()=>{ try{ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([json],{type:'application/json'})); a.download='hippocampus-backup-'+today()+'.json'; a.click(); }catch{ toast('這裡無法下載，請用複製'); } };
+  };
+  mm.querySelector('#s_imp').onclick=()=>{
+    const m3=openModal(`<h2>匯入資料</h2><div class="f"><label>貼上匯出的 JSON，或選擇檔案</label><textarea class="tall" id="ij"></textarea></div>
+      <div class="f"><input type="file" accept=".json,application/json" id="ifile"></div>
+      <div class="f"><label><input type="checkbox" id="iover"> 同 ID 的資料以匯入內容覆蓋（不勾則略過重複）</label></div>
+      <div class="modal-foot"><span></span><div><button class="btn ghost" data-x>取消</button> <button class="btn pri" id="igo">匯入</button></div></div>`);
+    m3.querySelector('[data-x]').onclick=closeModal;
+    m3.querySelector('#ifile').onchange=e=>{ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>$('#ij').value=r.result; r.readAsText(f); };
+    m3.querySelector('#igo').onclick=async()=>{
+      let data; try{ data=JSON.parse($('#ij').value); }catch{ toast('JSON 格式不正確'); return; }
+      const over=$('#iover').checked; let n=0;
+      for(const c of COLS){ for(const o of (data[c]||[])){ if(!o.id) continue; if(!over && DB[c].some(x=>x.id===o.id)) continue; await store.save(c,o); n++; } }
+      if(data.meta && isOwner()){ const nm={...data.meta, ...DB.meta, editors:DB.meta.editors||data.meta.editors||[]}; if(!DB.meta.title) Object.assign(nm,data.meta); await store.saveMeta(nm); }
+      closeModal(); toast(`已匯入 ${n} 筆`);
+    };
+  };
+}
+
+/* ============================================================
+   路由 & 事件
+   ============================================================ */
+function go(h){ if(location.hash.slice(1)===h) render(); else location.hash=h; }
+function route(){ const h=location.hash.slice(1)||'home'; const i=h.indexOf('-'); return i<0?[h,'']:[h.slice(0,i),h.slice(i+1)]; }
+function render(){
+  if(!ready){ $('#app').innerHTML='<div class="empty">載入中…</div>'; return; }
+  const [p,id]=route();
+  document.querySelectorAll('#nav a').forEach(a=>{ const g=a.dataset.go; a.classList.toggle('on', g===p || (g==='lore'&&p==='char') || (g==='stories'&&p==='story')); });
+  const banner = mode==='local' ? `<div class="banner">預覽模式：目前沒有接上 Firebase，內容只會存在這個瀏覽器裡。填好 config.js 並部署後就會連上 Firebase。</div>` : '';
+  let html='';
+  switch(p){
+    case 'lore': html=viewLore(); break;
+    case 'char': html=viewChar(id); break;
+    case 'stories': html=viewStories(); break;
+    case 'story': html=viewStory(id); break;
+    case 'paro': html= id? viewParo(id) : viewParos(); break;
+    case 'comm': html=viewComm(); break;
+    default: html=viewHome();
+  }
+  $('#app').innerHTML = banner + html;
+  $('#brandName').textContent = DB.meta.title || '沙蟲海珀';
+  document.title = (DB.meta.title||'沙蟲海珀') + ' · ' + (DB.meta.subtitle||'達魯 & 丹德里提');
+  $('#foot').innerHTML = `<span>${esc(DB.meta.title||'沙蟲海珀')} — ${esc(DB.meta.subtitle||'')}</span><span>Holloy Academy Archive</span>`;
+  renderAuth();
+}
+let _raf=0; function schedule(){ cancelAnimationFrame(_raf); _raf=requestAnimationFrame(render); }
+
+function renderAuth(){
+  const a=$('#auth');
+  if(mode==='local'){ a.innerHTML=`<span class="badge warn">預覽模式</span><button class="btn sm ghost" data-settings title="網站設定">⚙</button>`; return; }
+  if(!user){ a.innerHTML=`<button class="btn sm" data-login>Google 登入</button>`; return; }
+  a.innerHTML = `${user.photoURL?`<img src="${esc(user.photoURL)}" alt="">`:''}<span class="badge ${canEdit()?'ok':''}">${canEdit()?'可編輯':'僅瀏覽'}</span>${canEdit()?'<button class="btn sm ghost" data-settings title="網站設定">⚙</button>':''}<button class="btn sm ghost" data-logout>登出</button>`;
+}
+
+document.addEventListener('click',e=>{
+  const t=e.target;
+  const ed=t.closest('[data-edit]'); if(ed){ e.stopPropagation(); const [c,id]=ed.dataset.edit.split(':'); openEditor(c, DB[c].find(x=>x.id===id)); return; }
+  const ad=t.closest('[data-add]'); if(ad){ e.stopPropagation(); openEditor(ad.dataset.add, null, ad.dataset.preset?JSON.parse(ad.dataset.preset):{}); return; }
+  if(t.closest('[data-settings]')){ openSettings(); return; }
+  if(t.closest('[data-login]')){ store.login().catch(err=>toast('登入失敗：'+(err.code||err.message))); return; }
+  if(t.closest('[data-logout]')){ store.logout(); return; }
+  const cp=t.closest('[data-copy]'); if(cp){ navigator.clipboard?.writeText(cp.dataset.copy).then(()=>toast('已複製 '+cp.dataset.copy)).catch(()=>toast(cp.dataset.copy)); return; }
+  const tab=t.closest('.tabs[data-scope] button'); if(tab){ const sc=tab.parentElement.dataset.scope; ui.tab[sc]=tab.dataset.tab; tab.parentElement.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b===tab)); $('#scopeBody').innerHTML=scopeBody(sc,tab.dataset.tab); return; }
+  const ct=t.closest('[data-ct]'); if(ct){ ui.commTab=ct.dataset.ct; render(); return; }
+  const g=t.closest('[data-go]'); if(g && !t.closest('a[href]')){ e.preventDefault(); go(g.dataset.go); window.scrollTo({top:0}); }
+});
+document.addEventListener('input',e=>{
+  if(e.target.id==='sq'){ ui.storyQ=e.target.value; $('#storyList').innerHTML=storyCards(); }
+});
+document.addEventListener('change',e=>{
+  if(e.target.id==='ss'){ ui.storyScope=e.target.value; $('#storyList').innerHTML=storyCards(); }
+  if(e.target.id==='st'){ ui.storyType=e.target.value; $('#storyList').innerHTML=storyCards(); }
+});
+window.addEventListener('hashchange',()=>{ render(); window.scrollTo({top:0}); });
+
+/* ============================================================
+   資料層：預覽模式（localStorage）
+   ============================================================ */
+function seed(){
+  const dar='c'+uid(), dan='c'+uid();
+  return {
+    meta:{ title:'沙蟲海珀', titleEn:'Desert Worm, Drowned Amber', subtitle:'達魯 & 丹德里提', intro:'' },
+    chars:[
+      {id:dar, name:'達魯', nameEn:'Daru Rajput・達魯·拉傑普特', scope:'main', order:1, quote:'',
+       fields:'學年：四年級\n年齡：16\n生日：11月8日\n出身：拉傑普特家族（父）／垂星之子（母）\n特性魔法：餓鬼的餐桌（餓鬼的地圖）・星啟路',
+       profile:'## 特性魔法\n**餓鬼的餐桌／餓鬼的地圖**：與對方對視七秒，感知其最強烈的渴望（依佛教七種分類）。在獻眼事件後覺醒，眼睛為魔法構成的義眼，瞳孔像磁流體。\n\n**星啟路**：從母親〈牧者之籃〉退化而來的魔法。只在夜裡、像做夢一樣無意識發動，會把他人（或自己）潛意識中的渴望化作星軌顯現。\n\n## 性格與小物\n- 墨鏡\n- 用玩笑與鬥嘴帶過脆弱\n- 習慣塞饢餅給別人吃',
+       tags:'墨鏡, 沙漠, 渴望'},
+      {id:dan, name:'丹德里提', nameEn:'Dandelight・デンドリティック', scope:'main', order:2, quote:'',
+       fields:'種族：人造人\n特徵：沒有靈魂，沒有感情', profile:'', tags:'人造人'},
+    ],
+    lore:[
+      {id:uid(), scope:'main', category:'學院', title:'霍洛伊學院 Holloy Academy', order:1, content:'位於架空 21 世紀英國的魔法學院，採英式學制。'},
+      {id:uid(), scope:'main', category:'學院', title:'夜靈日', order:2, content:'十月最後一個星期三開始，全校陷入為期一週的黑暗。\n\n- 晚上 11 點起配戴魔法飾品（每人外觀不同），可看見平時看不見的靈體——校園幽靈，或召喚來的熟悉之人\n- 效果最多三小時，凌晨 2 點失效\n- 結束後可留作紀念，也可歸還'},
+      {id:uid(), scope:'main', category:'種族', title:'垂星之子', order:3, content:'魔力來自星辰，而非土地、血脈或元素。每人出生時被一顆共鳴的「命星」選中。\n\n- 命星長時間沉在地平線下會出現**星隱症狀**（頭痛、失眠、記憶模糊），久留一地則惡化為致命的**墜落**\n- 以「星隊」為單位，沿世代相傳的「星軌路」遷徙\n- 禁忌：**築基**（建造永久居所）\n- 混血兒繼承「不完整的命星牽引」'},
+    ],
+    events:[
+      {id:uid(), scope:'main', when:'過去', sort:'01', title:'塔利亞被星隊帶回星軌路', chars:[dar], desc:'母親塔利亞因築基而瀕臨墜落，被星隊強行帶走，留下達魯與一只耳環。'},
+      {id:uid(), scope:'main', when:'過去', sort:'02', title:'獻眼與魔法覺醒', chars:[dar], desc:'失去雙眼、獲得魔法構成的義眼，覺醒〈餓鬼的餐桌〉。'},
+      {id:uid(), scope:'main', when:'11月8日', sort:'03', title:'達魯的生日', chars:[dar], desc:''},
+    ],
+    stories:[
+      {id:uid(), title:'HIPPOCAMPUS', type:'交流', scope:'main', author:'麥 × Niyam_sixso11_', date:today(), chars:[dar,dan], tags:'夢境, 套娃, 海馬迴',
+       summary:'達魯拿到能悄悄打開他人夢境的鑰匙，進入丹德里提的夢——以為是夢，眼前先出現的卻是一個套娃。',
+       link:'', content:'## 大綱\n- 達魯拿到鑰匙打算進入夢境 → 以為是夢，結果眼前先出現的是個套娃\n- 丹德知道自己是人造人，潛意識可能暴露秘密——有風險，但能用「只是夢」帶過；入侵夢境有發瘋的風險；他自己不會想到，但直接拒絕又很奇怪；鑰匙會悄悄打開別人的夢，對他來說防不勝防\n\n## 海馬迴與套娃\n俄羅斯娃娃一層層打開：人造人 → 腦中的海馬迴 → 人類胚胎 → 餐盤 → 胚胎 → 圓體 → 肉體組織\n\n> 海馬迴形似海馬；蜷曲的人魚、抱膝的胚胎，也都像海馬迴。\n\n## 意象\n- 紅色的海、藍綠色的血管／青筋\n- 海底的骨頭＝歷代死去的意識；骨頭變成的套娃（？）\n- 一顆被放進達魯腦中的蛋（驚魂夜前置？）\n\n## 參考\n靈薄獄、清醒夢、所羅門的小鑰匙'},
+    ],
+    paros:[], sheets:[], comms:[],
+  };
+}
+function initLocal(){
+  mode='local';
+  let data=null; try{ data=JSON.parse(localStorage.getItem(LS_KEY)||'null'); }catch{}
+  if(!data) data=seed();
+  DB.meta=data.meta||{}; if(DB.meta.title==='HIPPOCAMPUS') DB.meta.title='沙蟲海珀'; if(String(DB.meta.intro||'').startsWith('霍洛伊學院・架空 21 世紀英國。')) DB.meta.intro=''; COLS.forEach(c=>DB[c]=data[c]||[]); DB.chars=DB.chars.filter(c=>c.name!=='里弗·雷文');
+  const persist=()=>{ try{ const d={meta:DB.meta}; COLS.forEach(c=>d[c]=DB[c]); localStorage.setItem(LS_KEY,JSON.stringify(d)); }catch(e){ console.warn(e); toast('瀏覽器儲存空間不足或無法使用，資料只會保留到關閉分頁'); } };
+  persist();
+  store={
+    async save(c,o){ const i=DB[c].findIndex(x=>x.id===o.id); if(i>=0) DB[c][i]=o; else DB[c].push(o); persist(); schedule(); },
+    async remove(c,id){ DB[c]=DB[c].filter(x=>x.id!==id); persist(); schedule(); },
+    async saveMeta(m){ DB.meta=m; persist(); schedule(); },
+    login:async()=>{}, logout:async()=>{},
+  };
+  ready=true; render();
+}
+
+/* ============================================================
+   資料層：Firebase（Google 登入 + Firestore 即時同步）
+   ============================================================ */
+async function initFirebase(){
+  const V='10.12.2', base=`https://www.gstatic.com/firebasejs/${V}/`;
+  const [{initializeApp},A,F] = await Promise.all([import(base+'firebase-app.js'),import(base+'firebase-auth.js'),import(base+'firebase-firestore.js')]);
+  const app=initializeApp(FIREBASE_CONFIG), db=F.getFirestore(app), auth=A.getAuth(app);
+  mode='firebase';
+  A.onAuthStateChanged(auth,u=>{ user=u; schedule(); });
+  let pending=new Set([...COLS,'meta']);
+  const done=k=>{ pending.delete(k); if(!pending.size){ ready=true; } schedule(); };
+  COLS.forEach(c=>F.onSnapshot(F.collection(db,c),snap=>{ DB[c]=snap.docs.map(d=>({...d.data(),id:d.id})); done(c); },err=>{ console.error(c,err); done(c); }));
+  F.onSnapshot(F.doc(db,'site','meta'),d=>{ DB.meta=d.exists()?d.data():{}; done('meta'); },err=>{ console.error(err); done('meta'); });
+  const clean=o=>JSON.parse(JSON.stringify(o));
+  store={
+    save:(c,o)=>F.setDoc(F.doc(db,c,o.id),clean(o)),
+    remove:(c,id)=>F.deleteDoc(F.doc(db,c,id)),
+    saveMeta:m=>F.setDoc(F.doc(db,'site','meta'),clean(m)),
+    login:()=>A.signInWithPopup(auth,new A.GoogleAuthProvider()),
+    logout:()=>A.signOut(auth),
+  };
+}
+
+render();
+loadConfig().then(()=>{
+  if(FIREBASE_CONFIG){ initFirebase().catch(err=>{ console.error(err); toast('Firebase 連線失敗，改用預覽模式'); initLocal(); }); }
+  else initLocal();
+});
+</script>
+</body>
+</html>
