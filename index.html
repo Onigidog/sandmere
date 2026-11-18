@@ -13,8 +13,8 @@
    ============================================================ */
 :root{
   --paper:#ebe9e3; --paper2:#f1efea; --paper3:#e0ddd5;
-  --ink:#1b1b19; --ink-dim:#4d4b46; --mute:#8a867d;
-  --line:#c6c2b8; --rule:#1b1b19;
+  --ink:#282828; --ink-dim:#4d4b46; --mute:#8a867d;
+  --line:#c6c2b8; --rule:#282828;
   --red:#a3372e; --gold:#958865; --gold-soft:#bdb498; --sage:#76807a; --sage-soft:#a9afaa;
   /* 舊變數名對應（內嵌樣式沿用） */
   --abyss:var(--paper); --deep:var(--paper3); --panel:var(--paper2); --panel2:var(--paper3);
@@ -116,7 +116,7 @@ a.chip:hover{border-color:var(--ink);color:var(--ink)}
 .char-card{padding:0;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;border:1px solid var(--rule);background:var(--paper2)}
 .portrait{aspect-ratio:3/4;background:var(--paper3);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--rule)}
 .portrait img{width:100%;height:100%;object-fit:cover;display:block;filter:grayscale(.25) contrast(1.02)}
-.portrait .ph{font-family:var(--serif);font-size:72px;color:rgba(27,27,25,.12);font-weight:400}
+.portrait .ph{font-family:var(--serif);font-size:72px;color:rgba(40,40,40,.12);font-weight:400}
 .char-card .body{padding:10px 14px 14px}
 .char-card h3{font-size:17px}
 .char-card:hover h3{color:var(--red)}
@@ -232,7 +232,7 @@ dl.fields dd{color:var(--ink-dim)}
 .sortlist li b{font-family:var(--sans);font-weight:700;letter-spacing:.04em}
 .sortlist li .en{font-family:var(--mono);font-size:11px;color:var(--mute);margin-left:10px}
 .sortlist li.pressing{background:var(--paper3)}
-.sortlist li.dragging{background:var(--paper);outline:1px solid var(--ink);box-shadow:0 8px 20px rgba(27,27,25,.18);position:relative;z-index:2;cursor:grabbing}
+.sortlist li.dragging{background:var(--paper);outline:1px solid var(--ink);box-shadow:0 8px 20px rgba(40,40,40,.18);position:relative;z-index:2;cursor:grabbing}
 .sortlist li.dragging .grip{color:var(--red)}
 .paro-head{padding:26px 30px 26px 34px;margin-bottom:28px;background:var(--paper2);border:1px solid var(--rule);position:relative}
 .paro-head::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--accent,var(--red))}
@@ -270,8 +270,8 @@ dl.fields dd{color:var(--ink-dim)}
 .empty svg{width:40px;height:40px;opacity:.5;margin-bottom:8px}
 
 /* modal */
-.modal-bg{position:fixed;inset:0;background:rgba(27,27,25,.45);z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto}
-.modal{background:var(--paper2);border:1px solid var(--ink);width:100%;max-width:720px;padding:26px 30px;box-shadow:8px 8px 0 rgba(27,27,25,.12)}
+.modal-bg{position:fixed;inset:0;background:rgba(40,40,40,.45);z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto}
+.modal{background:var(--paper2);border:1px solid var(--ink);width:100%;max-width:720px;padding:26px 30px;box-shadow:8px 8px 0 rgba(40,40,40,.12)}
 .modal h2{margin:0 0 20px;font-family:var(--sans);font-size:20px;letter-spacing:.06em;font-weight:700;padding-bottom:10px;border-bottom:1px solid var(--rule)}
 .modal.sm{max-width:420px}
 .f{margin-bottom:16px}
@@ -466,6 +466,21 @@ svg.lk{width:1em;height:1em;vertical-align:-.12em;flex:none}
 .lockchk{display:inline-flex !important;align-items:center;gap:8px;cursor:pointer;font-family:var(--sans) !important;font-size:14px !important;letter-spacing:.04em !important;text-transform:none !important;color:var(--ink) !important;border:1px solid var(--line);padding:6px 12px;margin:0 !important}
 .lockchk input{accent-color:var(--red)}
 .btn svg.lk,.badge svg.lk{margin-right:4px}
+/* 筆記 */
+#fabNote{position:fixed;right:22px;bottom:22px;z-index:40;width:52px;height:52px;display:flex;align-items:center;justify-content:center;background:var(--ink);color:var(--paper);border:none;padding:0;cursor:pointer;clip-path:polygon(10px 0,calc(100% - 10px) 0,100% 10px,100% calc(100% - 10px),calc(100% - 10px) 100%,10px 100%,0 calc(100% - 10px),0 10px);transition:background .15s}
+#fabNote:hover{background:var(--red)}
+#fabNote svg{width:24px;height:24px}
+@media (max-width:600px){#fabNote{right:14px;bottom:14px;width:48px;height:48px}}
+#fabNote[hidden]{display:none}
+@media (max-width:600px){#fabNote{right:14px;bottom:14px;padding:12px}#fabNote b{display:none}}
+.notes{columns:3 300px;column-gap:20px}
+.note{break-inside:avoid;margin:0 0 20px;background:var(--paper2);border:1px solid var(--rule);border-top:3px solid var(--gold);padding:12px 16px 14px;cursor:pointer;transition:border-color .15s}
+.note:hover{border-color:var(--ink);border-top-color:var(--red)}
+.note-meta{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;font-family:var(--mono);font-size:11px;color:var(--mute);letter-spacing:.06em;margin-bottom:6px}
+.note-meta .chip{margin:0}
+.note h3{font-family:var(--sans);font-size:16px;margin:2px 0 6px;letter-spacing:.04em}
+.note .prose{font-size:14.5px;line-height:1.8}
+#navNotes[hidden]{display:none}
 .mrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:7px 18px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;z-index:60;opacity:0;transition:.25s;pointer-events:none}
 .toast.on{opacity:1}
@@ -479,7 +494,7 @@ footer{max-width:1140px;width:calc(100% - 40px);margin:0 auto;padding:18px 0 40p
   <div class="top-inner">
     <div class="brand" data-go="home">
       <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1">
-        <ellipse cx="20" cy="22" rx="15" ry="16" stroke="#1b1b19"/>
+        <ellipse cx="20" cy="22" rx="15" ry="16" stroke="#282828"/>
         <ellipse cx="20" cy="23.5" rx="10.5" ry="11.5" stroke="#9c8758"/>
         <ellipse cx="20" cy="25" rx="6" ry="7" stroke="#738270"/>
         <circle cx="20" cy="26" r="2.2" fill="#ad3328" stroke="none"/>
@@ -494,6 +509,7 @@ footer{max-width:1140px;width:calc(100% - 40px);margin:0 auto;padding:18px 0 40p
       <a data-go="gallery" data-n="04">畫冊</a>
       <span class="nav-sep" aria-hidden="true"></span>
       <a data-go="comm" data-n="">委託</a>
+      <a data-go="notes" data-n="" id="navNotes" hidden>筆記</a>
     </nav>
     <div class="auth" id="auth"></div>
   </div>
@@ -503,6 +519,7 @@ footer{max-width:1140px;width:calc(100% - 40px);margin:0 auto;padding:18px 0 40p
 <footer id="foot">沙蟲海珀</footer>
 <div id="modalRoot"></div>
 <div class="toast" id="toast"></div>
+<button id="fabNote" type="button" hidden title="新增筆記（僅編輯者可見）" aria-label="新增筆記"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.2-4.6L15.8 4.8a1.9 1.9 0 0 1 2.7 0l.7.7a1.9 1.9 0 0 1 0 2.7L8.6 18.8z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 6.6l3.4 3.4M4 20l4.6-1.2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>
 
 <script type="module">
 /* ============================================================
@@ -520,9 +537,9 @@ async function loadConfig(){
   }catch(e){ console.info('config.js 未載入，使用預覽模式'); }
 }
 
-const COLS = ['chars','events','lore','stories','paros','sheets','comms','tlconf','gallery','locks'];
+const COLS = ['chars','events','lore','stories','paros','sheets','comms','tlconf','gallery','locks','notes'];
 const LS_KEY = 'hippocampus-site-v1';
-const DB = { meta:{}, chars:[], events:[], lore:[], stories:[], paros:[], sheets:[], comms:[], tlconf:[], gallery:[], locks:[] };
+const DB = { meta:{}, chars:[], events:[], lore:[], stories:[], paros:[], sheets:[], comms:[], tlconf:[], gallery:[], locks:[], notes:[] };
 let store = null, user = null, mode = 'local', ready = false;
 const ui = { tab:{}, storyQ:'', storyScope:'', storyType:'', commTab:'sheets' };
 
@@ -548,7 +565,7 @@ const canEdit = () => !ui.asVisitor && realCanEdit();
 /* ----- 鎖定 ----- */
 const LOCKABLE=['lore','chars','events','stories','paros','sheets','gallery','tlconf'];
 const PAGE_OF={lore:'lore',chars:'lore',events:'lore',tlconf:'lore',stories:'stories',paros:'paro',gallery:'gallery',sheets:'comm',comms:'comm'};
-const PAGE_NAME={lore:'設定',stories:'故事',paro:'PARO',gallery:'畫冊',comm:'委託'};
+const PAGE_NAME={lore:'設定',stories:'故事',paro:'PARO',gallery:'畫冊',comm:'委託',notes:'筆記'};
 const pageLocked = pg => !!(DB.meta.pageLock||{})[pg];
 const hiddenPage = pg => pageLocked(pg) && !canEdit();
 const vis = (col,list) => canEdit()? list.slice() : (hiddenPage(PAGE_OF[col])? [] : list.filter(x=>!x.locked));
@@ -713,6 +730,10 @@ const SCHEMA = {
     {k:'notes',l:'其他備註',t:'md'},
     {k:'order',l:'排序',t:'number'},
   ]},
+  notes: { title:'筆記', fields:[
+    {k:'scope',l:'屬於哪裡的設定',t:'scope',half:1},{k:'title',l:'標題（可留空）',half:1},
+    {k:'text',l:'內容',t:'md',req:1,tall:1},
+  ]},
   gallery: { title:'畫冊作品', fields:[
     {k:'locked',l:'鎖定',t:'check',hint:'勾選後，沒有受邀的人只會看到一塊灰色鎖定區塊'},
     {k:'image',l:'圖片',t:'image',req:1},
@@ -797,6 +818,7 @@ function openEditor(col, item, preset={}){
   }
   if(isNew && col==='stories' && !obj.date) obj.date=today();
   if(isNew && (col==='comms'||col==='gallery') && !obj.date) obj.date=today();
+  if(isNew && col==='notes'){ obj.createdAt=Date.now(); obj.author=user?.displayName||user?.email||''; }
   if(col==='sheets' && !obj.caution && (obj.dos||obj.donts)) obj.caution=[obj.dos,obj.donts].filter(Boolean).join('\n');
   if(isNew && col==='paros' && (obj.order===undefined||obj.order==='')) obj.order=DB.paros.reduce((mx,p)=>Math.max(mx,Number(p.order)||0),0)+1;
   if(isNew && !obj.scope && sch.fields.some(f=>f.t==='scope')) obj.scope='main';
@@ -939,6 +961,7 @@ function scopeTabs(scope){
   const t = ui.tab[scope] || 'world';
   const tabs=[['world','世界觀'],['chars','角色'],['time','時間軸']];
   if(scope!=='main') tabs.push(['stories','故事']);
+  if(canEdit()) tabs.push(['notes','筆記']);
   return `<div class="tabs" data-scope="${scope}">${tabs.map(([k,n])=>`<button data-tab="${k}" class="${t===k?'on':''}">${n}</button>`).join('')}</div>
   <div id="scopeBody">${scopeBody(scope,t)}</div>`;
 }
@@ -960,6 +983,7 @@ function scopeBody(scope,t){
     return `<div class="toolbar">${addBtn('chars','新增角色',{scope})}</div>` + (items.length?`<div class="grid g4">${items.map(x=>x._stub? `<div class="char-card lock-char">${lockBox('portrait')}</div>` : charCard(x)).join('')}</div>`:emptyBox('還沒有角色'));
   }
   if(t==='time') return renderTimeline(scope);
+  if(t==='notes') return canEdit()? `<div class="toolbar">${addBtn('notes','新增筆記',{scope})}<span class="muted small">${LOCK_SVG} 只有編輯者看得到</span></div>` + notesList(DB.notes.filter(n=>(n.scope||'main')===scope), false) : lockBox('page','僅限編輯者');
   if(t==='stories'){
     if(hiddenPage('stories')) return lockBox('page','這部分僅限受邀的編輯者瀏覽');
     const items=[...vis('stories',DB.stories).filter(inScope), ...stubsOf('stories',inScope)].sort(byDateDesc);
@@ -1335,6 +1359,30 @@ async function exportRefSheet(id){
   }finally{ host.remove(); }
 }
 
+/* ----- 筆記（僅編輯者） ----- */
+const noteTime = n => { const d=new Date(n.updatedAt||n.createdAt||0); return d.getTime()? `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}` : ''; };
+function notesList(list, showScope){
+  list=list.slice().sort((a,b)=>(b.updatedAt||b.createdAt||0)-(a.updatedAt||a.createdAt||0));
+  if(!list.length) return emptyBox('還沒有筆記');
+  return `<div class="notes">${list.map(n=>`
+    <article class="note" data-edit="notes:${n.id}">
+      <div class="note-meta">${showScope?`<span class="chip ${n.scope&&n.scope!=='main'?'vein':''}">${esc(scopeName(n.scope))}</span>`:''}<span>${esc(noteTime(n))}</span>${n.updatedBy||n.author?`<span>${esc(n.updatedBy||n.author)}</span>`:''}</div>
+      ${n.title?`<h3>${esc(n.title)}</h3>`:''}
+      <div class="prose">${md(n.text)}</div>
+    </article>`).join('')}</div>`;
+}
+function viewNotes(){
+  if(!canEdit()) return lockPagePanel('notes');
+  const f=ui.noteScope||'';
+  const list=f? DB.notes.filter(n=>(n.scope||'main')===f) : DB.notes;
+  const counts=sc=>DB.notes.filter(n=>(n.scope||'main')===sc).length;
+  return pageHead('NB','筆記','Editors only', addBtn('notes','新增筆記',{scope:f||'main'})) +
+    `<div class="gal-filter"><button class="${!f?'on':''}" data-notescope="">ALL <span class="muted">${DB.notes.length}</span></button>${scopeOptions().map(([k,n])=>`<button class="${f===k?'on':''}" data-notescope="${k}">${esc(n.replace(/^PARO・/,''))} <span class="muted">${counts(k)}</span></button>`).join('')}</div>` +
+    `<p class="muted small" style="margin:-10px 0 18px">${LOCK_SVG} 筆記只有房主和受邀的編輯者看得到，訪客完全讀不到。點筆記可以編輯。</p>` +
+    notesList(list, !f);
+}
+function currentScope(){ const [p,id]=route(); if(p==='paro'&&id&&DB.paros.some(x=>x.id===id)) return id; return 'main'; }
+
 /* ----- 畫冊 ----- */
 function viewGallery(){
   const all=[...vis('gallery',DB.gallery), ...stubsOf('gallery')].sort(byDateDesc);
@@ -1545,10 +1593,12 @@ function render(){
     case 'paro': html= id? viewParo(id) : viewParos(); break;
     case 'comm': html=viewComm(); break;
     case 'gallery': html=viewGallery(); break;
+    case 'notes': html=viewNotes(); break;
     default: html=viewHome();
   }
   const vb = ui.asVisitor? `<div class="banner" style="border-color:var(--sage);color:var(--sage);display:flex;justify-content:space-between;align-items:center">目前是「訪客視角」預覽：鎖定的內容會顯示成灰色鎖定區塊。<button class="btn sm ghost" data-asvisitor>結束預覽</button></div>` : '';
   $('#app').innerHTML = banner + vb + html;
+  $('#navNotes').hidden=!canEdit(); $('#fabNote').hidden=!canEdit();
   $('#brandName').textContent = DB.meta.title || '沙蟲海珀';
   document.title = DB.meta.title||'沙蟲海珀';
   $('#foot').innerHTML = `<span>${esc(DB.meta.title||'沙蟲海珀')}${DB.meta.subtitle?' — '+esc(DB.meta.subtitle):''}</span><span>Holloy Academy Archive</span>`;
@@ -1576,6 +1626,8 @@ document.addEventListener('click',e=>{
   const ed=t.closest('[data-edit]'); if(ed){ e.stopPropagation(); const [c,id]=ed.dataset.edit.split(':'); openEditor(c, DB[c].find(x=>x.id===id)); return; }
   const ad=t.closest('[data-add]'); if(ad){ e.stopPropagation(); openEditor(ad.dataset.add, null, ad.dataset.preset?JSON.parse(ad.dataset.preset):{}); return; }
   if(t.closest('[data-settings]')){ openSettings(); return; }
+  if(t.closest('#fabNote')){ openEditor('notes',null,{scope:currentScope()}); return; }
+  const nsc=t.closest('[data-notescope]'); if(nsc){ ui.noteScope=nsc.dataset.notescope; render(); return; }
   if(t.closest('[data-members]')){ openMembers(); return; }
   if(t.closest('[data-asvisitor]')){ ui.asVisitor=!ui.asVisitor; closeModal(); render(); return; }
   const pl2=t.closest('[data-pagelock]'); if(pl2){ const pg=pl2.dataset.pagelock; const on=!pageLocked(pg);
@@ -1644,7 +1696,7 @@ function seed(){
        summary:'達魯拿到能悄悄打開他人夢境的鑰匙，進入丹德里提的夢——以為是夢，眼前先出現的卻是一個套娃。',
        link:'', content:'## 大綱\n- 達魯拿到鑰匙打算進入夢境 → 以為是夢，結果眼前先出現的是個套娃\n- 丹德知道自己是人造人，潛意識可能暴露秘密——有風險，但能用「只是夢」帶過；入侵夢境有發瘋的風險；他自己不會想到，但直接拒絕又很奇怪；鑰匙會悄悄打開別人的夢，對他來說防不勝防\n\n## 海馬迴與套娃\n俄羅斯娃娃一層層打開：人造人 → 腦中的海馬迴 → 人類胚胎 → 餐盤 → 胚胎 → 圓體 → 肉體組織\n\n> 海馬迴形似海馬；蜷曲的人魚、抱膝的胚胎，也都像海馬迴。\n\n## 意象\n- 紅色的海、藍綠色的血管／青筋\n- 海底的骨頭＝歷代死去的意識；骨頭變成的套娃（？）\n- 一顆被放進達魯腦中的蛋（驚魂夜前置？）\n\n## 參考\n靈薄獄、清醒夢、所羅門的小鑰匙'},
     ],
-    paros:[], sheets:[], comms:[], gallery:[], locks:[],
+    paros:[], sheets:[], comms:[], gallery:[], locks:[], notes:[],
   };
 }
 function initLocal(){
@@ -1692,6 +1744,7 @@ async function initFirebase(){
     unsubs.forEach(u=>u()); unsubs=[];
     COLS.forEach(c=>{
       let q;
+      if(c==='notes' && !editor){ DB[c]=[]; done(c); return; }
       if(c==='locks' || editor) q=F.collection(db,c);
       else if(plk[PAGE_OF[c]]){ DB[c]=[]; done(c); return; }
       else q=F.query(F.collection(db,c),F.where('locked','==',false));
