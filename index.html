@@ -481,6 +481,46 @@ svg.lk{width:1em;height:1em;vertical-align:-.12em;flex:none}
 .note h3{font-family:var(--sans);font-size:16px;margin:2px 0 6px;letter-spacing:.04em}
 .note .prose{font-size:14.5px;line-height:1.8}
 #navNotes[hidden]{display:none}
+/* 首頁主視覺 v2 */
+.hero2{position:relative;padding:58px 0 0 0;margin:0 0 18px}
+.h2-side{position:absolute;left:0;top:58px;bottom:70px;writing-mode:vertical-rl;transform:rotate(180deg);font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink);white-space:nowrap;text-align:center}
+.h2-frame{position:relative;margin-left:70px;aspect-ratio:16/9;max-height:620px;width:calc(100% - 70px);border-radius:56px;overflow:hidden;background:var(--paper3)}
+.h2-frame img{width:100%;height:100%;object-fit:cover;display:block}
+.h2-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--mute);background:repeating-linear-gradient(135deg,transparent 0 14px,rgba(40,40,40,.035) 14px 15px)}
+.h2-tools{position:absolute;top:18px;right:22px;display:flex;gap:6px;opacity:0;transition:.15s}
+.h2-frame:hover .h2-tools{opacity:1}
+@media (hover:none){.h2-tools{opacity:1}}
+.h2-tools .btn{background:var(--paper);margin:0}
+.h2-title{position:absolute;left:40px;top:0;margin:0;display:flex;flex-direction:row;align-items:flex-start;gap:14px;font-family:var(--sans);font-weight:900;font-size:clamp(34px,5vw,58px);line-height:1;letter-spacing:0}
+.h2-col{display:flex;flex-direction:column;align-items:center;line-height:1.08}
+.h2-col i{font-style:normal;display:block;transform:skewX(-12deg)}
+.h2-col:nth-child(even){margin-top:.6em}
+.h2-foot{display:flex;justify-content:flex-end;align-items:baseline;gap:22px;padding:16px 0 0 70px}
+.h2-date{font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--ink)}
+.h2-tag{font-family:var(--mono);font-size:12px;font-style:italic;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-dim)}
+@media (max-width:760px){
+  .hero2{padding-top:40px}
+  .h2-side{display:none}
+  .h2-frame{margin-left:0;width:100%;aspect-ratio:4/5;border-radius:32px}
+  .h2-title{left:14px;gap:8px;font-size:34px}
+  .h2-foot{padding-left:0;flex-direction:column;align-items:flex-end;gap:4px}
+}
+/* ===== 左側直式導覽（桌機） ===== */
+@media (min-width:901px){
+  body{padding-left:208px}
+  header.top{position:fixed;top:0;left:0;bottom:0;width:208px;border-bottom:none;border-right:1px solid var(--rule);overflow-y:auto;background:rgba(235,233,227,.96)}
+  .top-inner{max-width:none;height:100%;flex-direction:column;flex-wrap:nowrap;padding:0;align-items:stretch}
+  .brand{border-right:none;border-bottom:1px solid var(--rule);margin:0;padding:26px 24px 22px;flex-direction:column;align-items:flex-start;gap:12px}
+  .brand svg{width:34px;height:34px}
+  .brand b{font-size:16px;letter-spacing:.24em}
+  nav.main{flex:none;flex-direction:column;flex-wrap:nowrap;padding:14px 0}
+  nav.main a{padding:11px 24px;font-size:15px}
+  nav.main a.on::after{left:0;right:auto;top:8px;bottom:8px;width:3px;height:auto}
+  nav.main a:hover{background:rgba(40,40,40,.04)}
+  .nav-sep{width:auto;height:1px;margin:10px 24px;background:var(--rule)}
+  .auth{margin-top:auto;flex-wrap:wrap;gap:6px;padding:16px 20px 22px;border-top:1px solid var(--rule)}
+  .auth .btn,.auth .badge{font-size:11px}
+}
 .mrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:7px 18px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;z-index:60;opacity:0;transition:.25s;pointer-events:none}
 .toast.on{opacity:1}
@@ -916,6 +956,8 @@ function lastUpdated(){
   const d=t? new Date(t) : new Date();
   return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
 }
+/* 標題直排分欄：有空白就照空白分；否則兩字一欄（三字以下一欄） */
+function heroCols(t){ t=String(t).trim(); if(/\s/.test(t)) return t.split(/\s+/).filter(Boolean); const a=[...t]; if(a.length<=3) return [t]; const out=[]; for(let i=0;i<a.length;i+=2) out.push(a.slice(i,i+2).join('')); return out; }
 /* ----- 首頁 ----- */
 function viewHome(){
   const m=DB.meta;
@@ -924,15 +966,19 @@ function viewHome(){
   const recent=vis('stories',DB.stories).sort(byDateDesc).slice(0,6);
   const paros=vis('paros',DB.paros).sort(byOrder);
   return `
-  <section class="hero">
-    <div class="hero-side"><div>Holloy Academy</div><div>Alt. 21st c. England</div><div>Record No. ${String(vis('stories',DB.stories).length).padStart(3,'0')}</div></div>
-    <div class="hero-main">
-      <div class="titlebox"><h1 aria-label="${esc(m.title||'沙蟲海珀')}">${[...(m.title||'沙蟲海珀')].map(ch=>`<span>${esc(ch)}</span>`).join('')}</h1>
-        <div class="cells"><span title="最後更新">${esc(lastUpdated())}</span></div></div>
-      ${(m.titleEn??'Desert Worm, Drowned Amber')?`<div class="tagline">${esc(m.titleEn??'Desert Worm, Drowned Amber')}</div>`:''}
-      ${m.intro?`<div class="intro prose">${md(m.intro)}</div>`:''}
+  <section class="hero2">
+    <div class="h2-side">Holloy Academy — Alt. 21st c. England — Record No. ${String(vis('stories',DB.stories).length).padStart(3,'0')}</div>
+    <div class="h2-frame">
+      ${m.heroImage?`<img src="${esc(m.heroImage)}" alt="">`:`<div class="h2-ph">${isOwner()?'按右上角「更換主圖」上傳首頁圖片':''}</div>`}
+      ${isOwner()?`<div class="h2-tools"><label class="btn sm">更換主圖<input type="file" accept="image/*" hidden data-heroimg></label>${m.heroImage?'<button class="btn sm" data-heroclear>移除</button>':''}</div>`:''}
+    </div>
+    <h1 class="h2-title" aria-label="${esc(m.title||'沙蟲海珀')}">${heroCols(m.title||'沙蟲海珀').map(c=>`<span class="h2-col">${[...c].map(ch=>`<i>${esc(ch)}</i>`).join('')}</span>`).join('')}</h1>
+    <div class="h2-foot">
+      <div class="h2-date">${esc(lastUpdated())}</div>
+      ${(m.titleEn??'Desert Worm, Drowned Amber')?`<div class="h2-tag">${esc(m.titleEn??'Desert Worm, Drowned Amber')}</div>`:''}
     </div>
   </section>
+  ${m.intro?`<div class="intro prose" style="max-width:640px;margin:0 auto 10px;color:var(--ink-dim)">${md(m.intro)}</div>`:''}
 
   ${duo.length?`<h2 class="sec">主要角色 <span class="en">Principal subjects</span></h2><div class="duo">${duo.map((c,i)=>{
       const f=lines(c.fields).map(l=>{ const k=l.search(/[:：]/); return k>0?[l.slice(0,k),l.slice(k+1)]:null; }).filter(Boolean).slice(0,5);
@@ -1628,6 +1674,7 @@ document.addEventListener('click',e=>{
   if(t.closest('[data-settings]')){ openSettings(); return; }
   if(t.closest('#fabNote')){ openEditor('notes',null,{scope:currentScope()}); return; }
   const nsc=t.closest('[data-notescope]'); if(nsc){ ui.noteScope=nsc.dataset.notescope; render(); return; }
+  if(t.closest('[data-heroclear]')){ askConfirm('移除首頁主圖？').then(async ok=>{ if(ok){ try{ await store.saveMeta({...DB.meta, heroImage:'', updatedAt:Date.now()}); toast('已移除'); }catch(err){ toast('失敗：'+(err.code||err.message)); } } }); return; }
   if(t.closest('[data-members]')){ openMembers(); return; }
   if(t.closest('[data-asvisitor]')){ ui.asVisitor=!ui.asVisitor; closeModal(); render(); return; }
   const pl2=t.closest('[data-pagelock]'); if(pl2){ const pg=pl2.dataset.pagelock; const on=!pageLocked(pg);
@@ -1655,6 +1702,8 @@ document.addEventListener('input',e=>{
   if(e.target.id==='sq'){ ui.storyQ=e.target.value; $('#storyList').innerHTML=storyCards(); }
 });
 document.addEventListener('change',e=>{
+  if(e.target.matches('[data-heroimg]')){ const f=e.target.files[0]; e.target.value=''; if(!f) return; toast('處理圖片中…');
+    compressImage(f,2000,760000).then(async url=>{ try{ await store.saveMeta({...DB.meta, heroImage:url, updatedAt:Date.now()}); toast('主圖已更新'); }catch(err){ toast('失敗：'+(err.code||err.message)); } }).catch(()=>toast('圖片讀取失敗')); return; }
   if(e.target.matches('[data-plurkimport]')){ const f=e.target.files[0]; e.target.value=''; if(f) importPlurkFile(f); return; }
   if(e.target.id==='ss'){ ui.storyScope=e.target.value; $('#storyList').innerHTML=storyCards(); }
   if(e.target.id==='st'){ ui.storyType=e.target.value; $('#storyList').innerHTML=storyCards(); }
