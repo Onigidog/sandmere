@@ -249,7 +249,9 @@ dl.fields dd{color:var(--ink-dim)}
 .sw:hover b{color:var(--red)}
 .sheet{display:grid;grid-template-columns:220px 1fr;gap:28px}
 @media (max-width:700px){.sheet{grid-template-columns:1fr}}
-.sheet .portrait{border:1px solid var(--rule)}
+.sheet .portrait{border:none;background:transparent}
+.sheet .portrait::after{display:none}
+.sheet .portrait img{object-fit:contain;filter:none}
 .dodont{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:12px;border:1px solid var(--rule)}
 .dodont>div{padding:10px 14px;font-size:14px}
 .dodont>div:first-child{border-right:1px solid var(--rule)}
@@ -397,17 +399,22 @@ nav.main a[data-n=""]::before{display:none}
 .caution h4{display:flex;align-items:center;gap:7px;margin:0 0 2px;font-family:var(--sans);font-size:13px;letter-spacing:.12em;font-weight:700}
 .caution h4 img{width:14px;height:14px}
 .caution .prose{font-size:14px;line-height:1.75}
+.kv{display:flex;flex-direction:column;gap:6px}
+.kv-row{display:grid;grid-template-columns:130px 1fr auto;gap:8px;align-items:center}
+.f .kv-row input{width:100%;background:var(--paper);border:1px solid var(--line);padding:6px 9px;font-family:var(--serif)}
+.f .kv-row input:focus{outline:none;border-color:var(--ink)}
+.kv-k{font-size:14px;color:var(--ink-dim)}
 .sheet-intro{font-size:14.5px;line-height:1.8;color:var(--ink-dim);border-left:2px solid var(--gold-soft);padding:2px 0 2px 12px;margin:0 0 12px}
 .sheet-sub{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--mute);margin:16px 0 6px;text-transform:uppercase}
 .sheet-refs{display:flex;flex-wrap:wrap;gap:8px}
-.sheet-refs img{height:110px;width:auto;border:1px solid var(--line);cursor:zoom-in}
+.sheet-refs img{height:110px;width:auto;cursor:zoom-in}
 /* 參考圖（匯出用，畫面外排版） */
 .rs-host{position:absolute;left:-30000px;top:0;width:960px;pointer-events:none}
 .rs{width:960px;background:#F0F0F0;color:#282828;padding:40px 44px 36px;font-family:var(--serif);box-sizing:border-box}
 .rs-grid{display:grid;grid-template-columns:520px 1fr;gap:30px;margin-bottom:24px}
 .rs-row{display:block}
 .rs-row>div:empty{display:none}
-.rs-main img{width:100%;height:auto;display:block;border:1px solid #282828}
+.rs-main img{width:100%;height:auto;display:block}
 .rs-noimg{height:520px;border:1px dashed #cfcfcf;display:flex;align-items:center;justify-content:center;font-family:var(--mono);color:#8c8c8c;letter-spacing:.2em}
 .rs-sec{margin-bottom:20px}
 .rs-h{font-family:var(--sans);font-weight:700;font-size:16px;letter-spacing:.12em;margin-bottom:8px;display:flex;align-items:center;gap:10px}
@@ -436,7 +443,7 @@ nav.main a[data-n=""]::before{display:none}
 .rs-caution .prose{font-size:13px;line-height:1.65}
 .rs-h img{width:14px;height:14px;display:block}
 .rs-refs{display:flex;flex-wrap:wrap;gap:12px}
-.rs-refs img{height:240px;width:auto;border:1px solid #282828;display:block}
+.rs-refs img{height:240px;width:auto;display:block}
 .mrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:7px 18px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;z-index:60;opacity:0;transition:.25s;pointer-events:none}
 .toast.on{opacity:1}
@@ -563,12 +570,21 @@ function compressImage(file, max=900, cap=880000){
   return new Promise((res,rej)=>{
     const fr=new FileReader();
     fr.onload=()=>{ const im=new Image(); im.onload=()=>{
-      const k=Math.min(1,max/Math.max(im.width,im.height)); const c=document.createElement('canvas');
-      c.width=Math.round(im.width*k); c.height=Math.round(im.height*k);
-      const g=c.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,c.width,c.height); g.drawImage(im,0,0,c.width,c.height);
-      let q=.85, out=c.toDataURL('image/jpeg',q);
-      while(out.length>cap && q>.45){ q-=.08; out=c.toDataURL('image/jpeg',q); }
-      if(out.length>cap){ const c2=document.createElement('canvas'); c2.width=Math.round(c.width*.75); c2.height=Math.round(c.height*.75); const g2=c2.getContext('2d'); g2.fillStyle='#fff'; g2.fillRect(0,0,c2.width,c2.height); g2.drawImage(c,0,0,c2.width,c2.height); out=c2.toDataURL('image/jpeg',.7); }
+      const k=Math.min(1,max/Math.max(im.width,im.height));
+      const draw=(w,h,src,fill)=>{ const c=document.createElement('canvas'); c.width=w; c.height=h; const g=c.getContext('2d'); if(fill){ g.fillStyle='#fff'; g.fillRect(0,0,w,h); } g.drawImage(src,0,0,w,h); return c; };
+      const W=Math.round(im.width*k), H=Math.round(im.height*k);
+      // 先判斷有沒有透明像素：有就保留透明（WebP，不支援則 PNG），沒有就用 JPEG
+      let alpha=false;
+      if(/png|webp|gif|svg/i.test(file.type)){
+        try{ const t=draw(W,H,im,false), d=t.getContext('2d').getImageData(0,0,W,H).data;
+          for(let i=3;i<d.length;i+=16){ if(d[i]<250){ alpha=true; break; } } }catch{}
+      }
+      const type=alpha?'image/webp':'image/jpeg';
+      let c=draw(W,H,im,!alpha), q=.85, out=c.toDataURL(type,q);
+      if(alpha && !out.startsWith('data:image/webp')) out=c.toDataURL('image/png');
+      while(out.length>cap && q>.45 && !out.startsWith('data:image/png')){ q-=.08; out=c.toDataURL(type,q); }
+      let scale=1;
+      while(out.length>cap && scale>.3){ scale*=.8; const c2=draw(Math.round(W*scale),Math.round(H*scale),c,!alpha); out=c2.toDataURL(alpha&&out.startsWith('data:image/png')?'image/png':type,.75); }
       res(out); };
       im.onerror=rej; im.src=fr.result; };
     fr.onerror=rej; fr.readAsDataURL(file);
@@ -625,7 +641,7 @@ const SCHEMA = {
   sheets: { title:'委託用設定', fields:[
     {k:'name',l:'角色／項目名稱',req:1,half:1},{k:'charId',l:'對應角色',t:'charSelect',half:1},
     {k:'image',l:'參考主圖',t:'image'},
-    {k:'profile',l:'基本資料',t:'textarea',hint:'一行一項「項目：內容」。參考圖會把「身高／年齡／種族」併成一行，下一行放「職業」，例如：身高：172cm、年齡：16、種族：半精靈、職業：霍洛伊四年級生'},
+    {k:'profile',l:'基本資料',t:'kv',defaults:['身高','體重','年齡','種族','職業'],hint:'空白的欄位不會顯示。參考圖會把身高／體重／年齡／種族併成一行，職業另起一行'},
     {k:'intro',l:'角色簡介',t:'textarea',hint:'約四行，給繪師快速了解角色'},
     {k:'colors',l:'配色',t:'textarea',hint:'一行一色：「#色碼 名稱」，例如「#ad3328 瞳色」'},
     {k:'appearance',l:'外觀重點',t:'md'},
@@ -692,6 +708,14 @@ function fieldHTML(f, v){
       const list=DB.chars.slice().sort(byOrder);
       input = list.length ? `<div class="checks" id="${id}">${list.map(c=>`<label><input type="checkbox" value="${c.id}" ${sel.has(c.id)?'checked':''}>${esc(c.name)}${c.scope&&c.scope!=='main'?`<span class="muted small">・${esc(scopeName(c.scope))}</span>`:''}</label>`).join('')}</div>` : `<div class="muted small">還沒有角色</div>`;
       break; }
+    case 'kv': {
+      let rows=lines(val).map(l=>{ const i=l.search(/[:：]/); return i>0?[l.slice(0,i).trim(),l.slice(i+1).trim()]:['',l.trim()]; });
+      const have=new Set(rows.map(r=>r[0]));
+      (f.defaults||[]).forEach(d=>{ if(!have.has(d)) rows.push([d,'']); });
+      const order=f.defaults||[]; rows.sort((a,b)=>{ const x=order.indexOf(a[0]), y=order.indexOf(b[0]); return (x<0?99:x)-(y<0?99:y); });
+      const row=([k,v])=>`<div class="kv-row"><input type="text" class="kv-k" value="${esc(k)}" placeholder="項目"><input type="text" class="kv-v" value="${esc(v)}" placeholder="內容"><button type="button" class="btn sm ghost" data-kvdel title="移除">×</button></div>`;
+      input=`<div class="kv" id="${id}">${rows.map(row).join('')}</div><button type="button" class="btn sm" data-kvadd="${id}" style="margin-top:6px">＋ 新增欄位</button>`;
+      break; }
     case 'images': input=`<div class="imgs" id="${id}" data-imgs="${f.k}"></div><label class="btn sm" style="margin:6px 0 0">＋ 上傳圖片<input type="file" accept="image/*" multiple hidden data-upmany="${f.k}"></label>`; break;
     case 'image': input=`<div class="img-row"><input type="text" id="${id}" value="${esc(String(val).startsWith('data:')?'':val)}" data-data="${String(val).startsWith('data:')?'1':''}" placeholder="${String(val).startsWith('data:')?'（已上傳圖片）':'貼上圖片網址，或按右邊上傳'}"><label class="btn sm" style="margin:0">上傳<input type="file" accept="image/*" hidden data-up="${id}"></label>${val?`<button type="button" class="btn sm ghost" data-clr="${id}">清除</button>`:''}</div><div class="hint">上傳的圖會自動縮小後存進資料庫</div>`; break;
     default: input=`<input type="text" id="${id}" value="${esc(val)}">`;
@@ -729,6 +753,12 @@ function openEditor(col, item, preset={}){
     box.innerHTML=imgsData[k].map((u,i)=>`<span class="imgs-th"><img src="${esc(u)}" alt=""><button type="button" data-rmimg="${k}:${i}" title="移除">×</button></span>`).join('') || '<span class="muted small">還沒有圖片</span>'; };
   Object.keys(imgsData).forEach(drawImgs);
   m.addEventListener('click',e=>{ const b=e.target.closest('[data-rmimg]'); if(!b) return; const [k,i]=b.dataset.rmimg.split(':'); imgsData[k].splice(Number(i),1); drawImgs(k); });
+  m.addEventListener('click',e=>{
+    const del=e.target.closest('[data-kvdel]'); if(del){ del.closest('.kv-row').remove(); return; }
+    const add=e.target.closest('[data-kvadd]'); if(add){ const box=m.querySelector('#'+add.dataset.kvadd);
+      box.insertAdjacentHTML('beforeend',`<div class="kv-row"><input type="text" class="kv-k" placeholder="項目"><input type="text" class="kv-v" placeholder="內容"><button type="button" class="btn sm ghost" data-kvdel title="移除">×</button></div>`);
+      box.lastElementChild.querySelector('.kv-k').focus(); }
+  });
   m.querySelectorAll('[data-upmany]').forEach(inp=>inp.addEventListener('change',async()=>{
     const k=inp.dataset.upmany;
     for(const file of inp.files){ try{ imgsData[k].push(await compressImage(file,1000,300000)); }catch{ toast('有圖片讀取失敗'); } }
@@ -754,6 +784,7 @@ function openEditor(col, item, preset={}){
         try{ const j=JSON.parse(v); if(!Array.isArray(j.items)) throw 0; obj[f.k]=j; }catch{ toast('噗文 JSON 格式不正確'); return; } continue; }
       if(f.t==='chars'){ obj[f.k]= el? [...el.querySelectorAll('input:checked')].map(x=>x.value) : []; continue; }
       if(f.t==='images'){ obj[f.k]=imgsData[f.k]||[]; continue; }
+      if(f.t==='kv'){ obj[f.k]=[...el.querySelectorAll('.kv-row')].map(r=>[r.querySelector('.kv-k').value.trim(), r.querySelector('.kv-v').value.trim()]).filter(([k,v])=>v).map(([k,v])=>k?`${k}：${v}`:v).join('\n'); continue; }
       if(f.t==='image'){ const typed=el.value.trim(); obj[f.k]= typed || (imgData[f.k]===null? '' : (imgData[f.k]||'')); continue; }
       if(!el) continue;
       obj[f.k]= f.t==='number' ? (el.value===''?'':Number(el.value)) : el.value;
@@ -1178,9 +1209,9 @@ function refSheetHTML(s){
   const sec=(n,t,body)=>`<div class="rs-sec"><div class="rs-h">${t}</div>${body}</div>`;
   let n=0; const no=()=>String(++n).padStart(2,'0');
   const pick=re=>{ const i=prof.findIndex(([k])=>re.test(k)); return i<0?null:prof.splice(i,1)[0][1].trim(); };
-  const ht=pick(/身高|height/i), ag=pick(/年齡|歲數|age/i), rc=pick(/種族|血統|race/i), job=pick(/職業|身分|身份|occupation|job/i);
+  const ht=pick(/身高|height/i), wt=pick(/體重|weight/i), ag=pick(/年齡|歲數|age/i), rc=pick(/種族|血統|race/i), job=pick(/職業|身分|身份|occupation|job/i);
   const agTxt=ag? (/^\d+$/.test(ag)? ag+'y' : ag) : '';
-  const statLine=[ht,agTxt,rc].filter(Boolean).join(' / ');
+  const statLine=[ht,wt,agTxt,rc].filter(Boolean).join(' / ');
   const restProf=prof.map(([k,v])=>v.trim()).filter(Boolean);
   return `<div class="rs">
     <div class="rs-grid">
