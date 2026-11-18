@@ -514,15 +514,15 @@ svg.lk{width:1em;height:1em;vertical-align:-.12em;flex:none}
   body{padding-left:148px}
   header.top{position:fixed;top:0;left:0;bottom:0;width:148px;border-bottom:none;border-right:1px solid var(--rule);overflow-y:auto;background:rgba(235,233,227,.96)}
   .top-inner{max-width:none;height:100%;flex-direction:column;flex-wrap:nowrap;padding:0;align-items:stretch}
-  .brand{border-right:none;border-bottom:1px solid var(--rule);margin:0;padding:22px 18px 18px;flex-direction:column;align-items:flex-start;gap:12px}
+  .brand{border-right:none;border-bottom:1px solid var(--rule);margin:0;padding:22px 12px 18px;flex-direction:column;align-items:center;gap:12px;text-align:center}
   .brand svg{width:28px;height:28px}
   .brand b{font-size:14px;letter-spacing:.2em}
   nav.main{flex:none;flex-direction:column;flex-wrap:nowrap;padding:14px 0}
-  nav.main a{padding:9px 18px;font-size:14px}
+  nav.main a{padding:9px 12px;font-size:14px;justify-content:center}
   nav.main a.on::after{left:0;right:auto;top:8px;bottom:8px;width:3px;height:auto}
   nav.main a:hover{background:rgba(40,40,40,.04)}
   .nav-sep{width:auto;height:1px;margin:8px 18px;background:var(--rule)}
-  .auth{margin-top:auto;flex-wrap:wrap;gap:4px;padding:12px 12px 16px;border-top:1px solid var(--rule)}
+  .auth{margin-top:auto;flex-wrap:wrap;justify-content:center;gap:4px;padding:12px 10px 16px;border-top:1px solid var(--rule)}
   .auth .btn,.auth .badge{font-size:11px}
 }
 /* PARO 票券卡 */
@@ -541,6 +541,11 @@ svg.lk{width:1em;height:1em;vertical-align:-.12em;flex:none}
 .tk-perf{height:3px;margin:0 2px;background:radial-gradient(circle,var(--ink) 1.1px,transparent 1.4px) 0 0/7px 3px repeat-x}
 .tk-no{font-family:var(--mono);font-size:14px;letter-spacing:.3em;text-align:center;padding:8px 0 10px}
 .lockbox.lb-tk{aspect-ratio:1/1.08;min-height:0;margin-bottom:104px}
+.omenu{display:flex;flex-direction:column;gap:10px}
+.omenu .btn{display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:12px 16px;text-align:left;font-family:var(--sans);letter-spacing:.04em}
+.omenu .btn b{font-size:15px}
+.omenu .btn span{font-family:var(--serif);font-size:12.5px;color:var(--mute);letter-spacing:0}
+.omenu .btn:hover span{color:var(--paper)}
 .mrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:7px 18px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;z-index:60;opacity:0;transition:.25s;pointer-events:none}
 .toast.on{opacity:1}
@@ -576,7 +581,7 @@ footer{max-width:1140px;width:calc(100% - 40px);margin:0 auto;padding:18px 0 40p
 </header>
 
 <main id="app"></main>
-<footer id="foot">沙蟲海珀</footer>
+
 <div id="modalRoot"></div>
 <div class="toast" id="toast"></div>
 <button id="fabNote" type="button" hidden title="新增筆記（僅編輯者可見）" aria-label="新增筆記"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l1.2-4.6L15.8 4.8a1.9 1.9 0 0 1 2.7 0l.7.7a1.9 1.9 0 0 1 0 2.7L8.6 18.8z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 6.6l3.4 3.4M4 20l4.6-1.2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>
@@ -1572,17 +1577,8 @@ function openMembers(){
   if(!isOwner()){ toast('只有房主可以管理成員'); return; }
   const eds=(DB.meta.editors||[]).map(em);
   const reqs=DB.requests.slice().sort((a,b)=>(a.at||0)-(b.at||0));
-  const m=openModal(`<div id="membersModal"><h2>成員管理</h2>
+  const m=openModal(`<div id="membersModal"><h2>成員與邀請</h2>
     <div class="f"><label>房主</label><div class="mono small">${esc(mode==='local'?'（預覽模式）':OWNER_EMAIL)}</div></div>
-
-    <div class="f"><label>待審核的申請（${reqs.length}）</label>
-      ${reqs.length?`<div style="border-top:1px solid var(--rule)">${reqs.map(r=>`
-        <div class="mrow">
-          <span><b>${esc(r.name||r.email)}</b> <span class="muted mono small">${esc(r.email)}</span>
-            ${r.note?`<div class="small" style="color:var(--ink-dim);margin-top:2px">「${esc(r.note)}」</div>`:''}</span>
-          <span style="white-space:nowrap"><button class="btn sm pri" data-approve="${esc(r.email)}">同意</button> <button class="btn sm ghost" data-reject="${esc(r.email)}">拒絕</button></span>
-        </div>`).join('')}</div>`:`<div class="muted small">目前沒有人申請</div>`}
-    </div>
 
     <div class="f"><label>編輯者（${eds.length}）</label>
       ${eds.length?`<div style="border-top:1px solid var(--rule)">${eds.map(e=>`
@@ -1594,7 +1590,7 @@ function openMembers(){
 
     <form id="inviteForm" class="f"><label>邀請編輯者（對方的 Google 帳號 email）</label>
       <div class="img-row"><input type="text" id="inviteEmail" placeholder="partner@gmail.com" autocomplete="off"><button class="btn pri" type="submit">邀請</button></div>
-      <div class="hint">加入後，對方用這個 Google 帳號登入就能編輯。也可以請對方先登入、按「申請編輯」，你再在上面按同意。</div>
+      <div class="hint">加入後，對方用這個 Google 帳號登入就能編輯。</div>
     </form>
     <div class="modal-foot"><span></span><div><button class="btn ghost" data-x>關閉</button></div></div></div>`);
   m.querySelector('[data-x]').onclick=closeModal;
@@ -1676,7 +1672,6 @@ function render(){
   $('#navNotes').hidden=!canEdit(); $('#fabNote').hidden=!canEdit();
   $('#brandName').textContent = DB.meta.title || '沙蟲海珀';
   document.title = DB.meta.title||'沙蟲海珀';
-  $('#foot').innerHTML = `<span>${esc(DB.meta.title||'沙蟲海珀')}${DB.meta.subtitle?' — '+esc(DB.meta.subtitle):''}</span><span>Holloy Academy Archive</span>`;
   renderAuth();
 }
 let _raf=0; function schedule(){ cancelAnimationFrame(_raf); _raf=requestAnimationFrame(render); }
@@ -1684,16 +1679,23 @@ let _raf=0; function schedule(){ cancelAnimationFrame(_raf); _raf=requestAnimati
 function renderAuth(){
   const a=$('#auth');
   const vt = realCanEdit()? `<button class="btn sm ${ui.asVisitor?'pri':'ghost'}" data-asvisitor title="用訪客的角度看網站">訪客視角</button>` : '';
-  if(mode==='local'){ a.innerHTML=`<span class="badge warn">預覽模式</span>${vt}<button class="btn sm ghost" data-members>成員</button><button class="btn sm ghost" data-settings title="網站設定">⚙</button>`; return; }
+  if(mode==='local'){ a.innerHTML=`<span class="badge warn">預覽模式</span><button class="btn sm" data-ownermenu>房主</button>${vt}`; return; }
   if(!user){ a.innerHTML=`<button class="btn sm" data-login>Google 登入</button>`; return; }
-  const role = isOwner()?'房主':canEdit()?'編輯者':'僅瀏覽';
-  const n = isOwner()? DB.requests.length : 0;
-  a.innerHTML = `${user.photoURL?`<img src="${esc(user.photoURL)}" alt="" title="${esc(user.email)}">`:''}
-    <span class="badge ${canEdit()?'ok':''}" title="${esc(user.email)}">${role}</span>
-    ${isOwner()?`<button class="btn sm ghost" data-members title="成員管理">成員${n?`<span style="background:var(--red);color:var(--paper);font-size:10px;padding:0 5px;margin-left:4px">${n}</span>`:''}</button>`:''}
-    ${!canEdit()?`<button class="btn sm" data-request>${myRequest?'申請中…':'申請編輯'}</button>`:''}
-    ${vt}${canEdit()?'<button class="btn sm ghost" data-settings title="網站設定">⚙</button>':''}
-    <button class="btn sm ghost" data-logout>登出</button>`;
+  const role = realOwner()? `<button class="btn sm" data-ownermenu title="${esc(user.email)}">房主</button>`
+    : `<span class="badge ${realCanEdit()?'ok':''}" title="${esc(user.email)}">${realCanEdit()?'編輯者':'僅瀏覽'}</span>`;
+  a.innerHTML = `${role}${vt}<button class="btn sm ghost" data-logout>登出</button>`;
+}
+function openOwnerMenu(){
+  const m=openModal(`<h2>房主</h2>
+    ${mode==='firebase'&&user?`<div class="mono small muted" style="margin:-8px 0 14px">${esc(user.email)}</div>`:''}
+    <div class="omenu">
+      <button class="btn" data-om="settings"><b>網站設定</b><span>名稱、英文副標、首頁介紹、備份匯出／匯入</span></button>
+      <button class="btn" data-om="members"><b>成員與邀請</b><span>邀請編輯者、移除編輯者（目前 ${(DB.meta.editors||[]).length} 位）</span></button>
+    </div>
+    <div class="modal-foot"><span></span><button class="btn ghost" data-x>關閉</button></div>`,'sm');
+  m.querySelector('[data-x]').onclick=closeModal;
+  m.querySelector('[data-om=settings]').onclick=openSettings;
+  m.querySelector('[data-om=members]').onclick=openMembers;
 }
 
 document.addEventListener('click',e=>{
@@ -1704,15 +1706,13 @@ document.addEventListener('click',e=>{
   if(t.closest('#fabNote')){ openEditor('notes',null,{scope:currentScope()}); return; }
   const nsc=t.closest('[data-notescope]'); if(nsc){ ui.noteScope=nsc.dataset.notescope; render(); return; }
   if(t.closest('[data-heroclear]')){ askConfirm('移除首頁主圖？').then(async ok=>{ if(ok){ try{ await store.saveMeta({...DB.meta, heroImage:'', updatedAt:Date.now()}); toast('已移除'); }catch(err){ toast('失敗：'+(err.code||err.message)); } } }); return; }
+  if(t.closest('[data-ownermenu]')){ ui.asVisitor=false; openOwnerMenu(); return; }
   if(t.closest('[data-members]')){ openMembers(); return; }
   if(t.closest('[data-asvisitor]')){ ui.asVisitor=!ui.asVisitor; closeModal(); render(); return; }
   const pl2=t.closest('[data-pagelock]'); if(pl2){ const pg=pl2.dataset.pagelock; const on=!pageLocked(pg);
     askConfirm(on?`鎖定「${PAGE_NAME[pg]}」整頁？沒有受邀的人只會看到一塊鎖定區塊。`:`把「${PAGE_NAME[pg]}」改回公開？`).then(async ok=>{ if(!ok) return;
       try{ await store.saveMeta({...DB.meta, updatedAt:Date.now(), pageLock:{...(DB.meta.pageLock||{}), [pg]:on}}); toast(on?'已鎖定':'已公開'); }catch(err){ toast('失敗：'+(err.code||err.message)); } }); return; }
   const tc=t.closest('[data-tlconf]'); if(tc){ openTlConf(tc.dataset.tlconf); return; }
-  if(t.closest('[data-request]')){ openRequest(); return; }
-  const ap=t.closest('[data-approve]'); if(ap){ addEditor(ap.dataset.approve).then(()=>{ toast('已同意'); openMembers(); }).catch(err=>toast('失敗：'+(err.code||err.message))); return; }
-  const rj=t.closest('[data-reject]'); if(rj){ store.deleteRequest(rj.dataset.reject).then(()=>{ toast('已拒絕'); openMembers(); }).catch(err=>toast('失敗：'+(err.code||err.message))); return; }
   const ue=t.closest('[data-unedit]'); if(ue){ askConfirm(`移除編輯者 ${ue.dataset.unedit}？`).then(async ok=>{ if(ok){ await store.saveMeta({...DB.meta, editors:(DB.meta.editors||[]).map(em).filter(x=>x!==ue.dataset.unedit)}); toast('已移除'); } openMembers(); }); return; }
   if(t.closest('[data-login]')){ store.login().catch(err=>toast('登入失敗：'+(err.code||err.message))); return; }
   if(t.closest('[data-logout]')){ store.logout(); return; }
@@ -1835,16 +1835,6 @@ async function initFirebase(){
   A.onAuthStateChanged(auth,u=>{
     user=u; myRequest=null; DB.requests=[];
     if(unReq){ unReq(); unReq=null; }
-    if(u){
-      if(isOwner()){
-        unReq=F.onSnapshot(F.collection(db,'requests'),snap=>{
-          DB.requests=snap.docs.map(d=>d.data());
-          schedule(); if($('#membersModal')) openMembers();
-        },err=>console.warn('requests',err));
-      }else{
-        unReq=F.onSnapshot(F.doc(db,'requests',em(u.email)),d=>{ myRequest=d.exists()?d.data():null; schedule(); },()=>{});
-      }
-    }
     authReady=true; resub();
     schedule();
   });
