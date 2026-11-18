@@ -372,9 +372,13 @@ nav.main a[data-n=""]::before{display:none}
 .gal-item .edit-row{position:absolute;top:8px;right:8px;z-index:2}
 .gal-item .edit-row .btn{background:var(--paper)}
 .gal-item:hover .edit-row{opacity:1}
-.gal-img{border:1px solid var(--rule);background:var(--paper3);cursor:zoom-in;line-height:0;overflow:hidden}
+.gal-img{position:relative;background:transparent;cursor:zoom-in;line-height:0;overflow:hidden}
 .gal-img img{width:100%;height:auto;display:block;transition:transform .5s ease}
-.gal-img:hover img{transform:scale(1.025)}
+.gal-ov{position:absolute;inset:0;background:rgba(241,239,234,.86);border:1px solid var(--ink);padding:18px 20px;display:flex;flex-direction:column;justify-content:space-between;line-height:1.7;opacity:0;transition:opacity .25s ease}
+.gal-img:hover .gal-ov{opacity:1}
+.gal-ov-t{font-family:var(--sans);font-size:16px;letter-spacing:.04em;color:var(--ink)}
+.gal-ov-b{font-family:var(--mono);font-size:12px;letter-spacing:.08em;color:var(--ink);text-transform:uppercase}
+@media (hover:none){.gal-ov{display:none}}
 .gal-item figcaption{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:7px 0 0;border-bottom:1px solid var(--line);padding-bottom:6px}
 .gal-art{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;color:var(--mute);text-transform:uppercase;white-space:nowrap}
 .gal-art b{font-weight:500;color:var(--ink);margin-left:2px;text-transform:none;letter-spacing:.06em}
@@ -522,21 +526,21 @@ svg.lk{width:1em;height:1em;vertical-align:-.12em;flex:none}
   .auth .btn,.auth .badge{font-size:11px}
 }
 /* PARO 票券卡 */
-.tickets{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:22px}
-.ticket{position:relative;background:var(--paper2);border:1px solid var(--line);padding:12px 12px 0;display:flex;flex-direction:column;cursor:pointer;min-height:100%}
+.tickets{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:16px}
+.ticket{position:relative;background:var(--paper2);border:1px solid var(--line);padding:9px 9px 0;display:flex;flex-direction:column;cursor:pointer;min-height:100%}
 .ticket:hover{border-color:var(--ink)}
 .ticket:hover h3{color:var(--red)}
 .ticket:hover .edit-row{opacity:1}
 .ticket .edit-row .btn{background:var(--paper)}
 .tk-img{aspect-ratio:1/1.08;background:var(--paper3);overflow:hidden}
 .tk-img img{width:100%;height:100%;object-fit:cover;display:block}
-.tk-body{flex:1;padding:16px 6px 18px;min-height:150px}
-.ticket h3{font-family:var(--sans);font-weight:900;font-size:28px;letter-spacing:.06em;line-height:1.2;margin:0;transition:color .12s}
-.tk-en{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);margin-top:6px}
-.tk-sum{font-family:var(--mono);font-size:11.5px;line-height:1.75;letter-spacing:.04em;color:var(--ink-dim);margin-top:12px}
+.tk-body{flex:1;padding:11px 4px 12px;min-height:104px}
+.ticket h3{font-family:var(--sans);font-weight:900;font-size:19px;letter-spacing:.06em;line-height:1.2;margin:0;transition:color .12s}
+.tk-en{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);margin-top:6px}
+.tk-sum{font-family:var(--mono);font-size:10.5px;line-height:1.7;letter-spacing:.03em;color:var(--ink-dim);margin-top:8px}
 .tk-perf{height:3px;margin:0 2px;background:radial-gradient(circle,var(--ink) 1.1px,transparent 1.4px) 0 0/7px 3px repeat-x}
-.tk-no{font-family:var(--mono);font-size:20px;letter-spacing:.32em;text-align:center;padding:12px 0 14px}
-.lockbox.lb-tk{aspect-ratio:1/1.08;min-height:0;margin-bottom:150px}
+.tk-no{font-family:var(--mono);font-size:14px;letter-spacing:.3em;text-align:center;padding:8px 0 10px}
+.lockbox.lb-tk{aspect-ratio:1/1.08;min-height:0;margin-bottom:104px}
 .mrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:7px 18px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;z-index:60;opacity:0;transition:.25s;pointer-events:none}
 .toast.on{opacity:1}
@@ -1461,8 +1465,12 @@ function viewGallery(){
     (list.length?`<div class="gal">${list.map(g=> g._stub? `<figure class="gal-item">${lockBox('tile')}</figure>` : `
       <figure class="gal-item">
         ${canEdit()?`<div class="edit-row"><button class="btn sm" data-edit="gallery:${g.id}">編輯</button></div>`:''}
-        <div class="gal-img" data-gal="${g.id}">${g.image?`<img src="${esc(g.image)}" alt="${esc(g.title||'')}" loading="lazy">`:''}</div>
-        <figcaption><span class="gal-art">${lkMini(g)}ART.<b>${esc(g.artist||'—')}</b></span>${g.title?`<span class="gal-title">${esc(g.title)}</span>`:''}</figcaption>
+        <div class="gal-img" data-gal="${g.id}">${g.image?`<img src="${esc(g.image)}" alt="${esc(g.title||'')}" loading="lazy">`:''}
+          <div class="gal-ov">
+            <div class="gal-ov-t">${lkMini(g)}ART. ${esc(g.artist||'—')}${g.title?` / ${esc(g.title)}`:''}</div>
+            <div class="gal-ov-b"><div>${esc((g.date||'').slice(0,4))}</div><div>${(g.chars||[]).map(id=>charName(id)).filter(Boolean).map(esc).join(', ')}</div></div>
+          </div>
+        </div>
       </figure>`).join('')}</div>`
     : emptyBox(DB.gallery.length?'這個角色還沒有作品':'畫冊還是空的', addBtn('gallery','新增作品')));
 }
