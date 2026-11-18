@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>沙蟲海珀 · 達魯 & 丹德里提</title>
+<title>沙蟲海珀</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=Noto+Serif+TC:wght@400;500;600;700;900&display=swap" rel="stylesheet">
 <style>
@@ -409,9 +409,9 @@ nav.main a[data-n=""]::before{display:none}
 .sheet-refs{display:flex;flex-wrap:wrap;gap:8px}
 .sheet-refs img{height:110px;width:auto;cursor:zoom-in}
 /* 參考圖（匯出用，畫面外排版） */
-.rs-host{position:absolute;left:-30000px;top:0;width:960px;pointer-events:none}
-.rs{width:960px;background:#F0F0F0;color:#282828;padding:40px 44px 36px;font-family:var(--serif);box-sizing:border-box}
-.rs-grid{display:grid;grid-template-columns:520px 1fr;gap:30px;margin-bottom:24px}
+.rs-host{position:absolute;left:-30000px;top:0;width:1000px;pointer-events:none}
+.rs{width:1000px;background:#F0F0F0;color:#282828;padding:40px 44px 36px;font-family:var(--serif);box-sizing:border-box}
+.rs-grid{display:grid;grid-template-columns:540px 1fr;gap:30px;margin-bottom:24px}
 .rs-row{display:block}
 .rs-row>div:empty{display:none}
 .rs-main img{width:100%;height:auto;display:block}
@@ -444,6 +444,28 @@ nav.main a[data-n=""]::before{display:none}
 .rs-h img{width:14px;height:14px;display:block}
 .rs-refs{display:flex;flex-wrap:wrap;gap:12px}
 .rs-refs img{height:240px;width:auto;display:block}
+/* 鎖定 */
+svg.lk{width:1em;height:1em;vertical-align:-.12em;flex:none}
+.lk-mini{display:inline-flex;color:var(--mute);margin-right:6px;font-size:.8em}
+.lockbox{--lockbg:#d8d6d0;background:#d8d6d0;color:#9a978f;display:flex;align-items:center;justify-content:center;gap:10px;min-height:120px;font-family:var(--mono);font-size:12px;letter-spacing:.12em}
+.lockbox svg.lk{width:26px;height:26px}
+.lockbox.lb-row{min-height:110px}
+.lockbox.lb-inline{min-height:44px;width:100%}
+.lockbox.lb-inline svg.lk{width:16px;height:16px}
+.lockbox.lb-portrait{aspect-ratio:3/4;min-height:0}
+.lockbox.lb-cover{min-height:220px}
+.lockbox.lb-tl{min-height:150px;margin-bottom:6px}
+.lockbox.lb-tile{aspect-ratio:4/5;min-height:0}
+.lockbox.lb-sheet{min-height:260px}
+.lockbox.lb-page{min-height:340px;flex-direction:column;gap:14px;font-size:13px}
+.lockbox.lb-page svg.lk{width:36px;height:36px}
+.lock-char{border:none;cursor:default;background:none}
+.lock-char .lockbox{height:100%}
+.lock-row{display:block;cursor:default;padding:6px 0}
+.lock-row::before{display:none}
+.lockchk{display:inline-flex !important;align-items:center;gap:8px;cursor:pointer;font-family:var(--sans) !important;font-size:14px !important;letter-spacing:.04em !important;text-transform:none !important;color:var(--ink) !important;border:1px solid var(--line);padding:6px 12px;margin:0 !important}
+.lockchk input{accent-color:var(--red)}
+.btn svg.lk,.badge svg.lk{margin-right:4px}
 .mrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:7px 18px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;z-index:60;opacity:0;transition:.25s;pointer-events:none}
 .toast.on{opacity:1}
@@ -498,9 +520,9 @@ async function loadConfig(){
   }catch(e){ console.info('config.js 未載入，使用預覽模式'); }
 }
 
-const COLS = ['chars','events','lore','stories','paros','sheets','comms','tlconf','gallery'];
+const COLS = ['chars','events','lore','stories','paros','sheets','comms','tlconf','gallery','locks'];
 const LS_KEY = 'hippocampus-site-v1';
-const DB = { meta:{}, chars:[], events:[], lore:[], stories:[], paros:[], sheets:[], comms:[], tlconf:[], gallery:[] };
+const DB = { meta:{}, chars:[], events:[], lore:[], stories:[], paros:[], sheets:[], comms:[], tlconf:[], gallery:[], locks:[] };
 let store = null, user = null, mode = 'local', ready = false;
 const ui = { tab:{}, storyQ:'', storyScope:'', storyType:'', commTab:'sheets' };
 
@@ -517,15 +539,48 @@ const tagsOf = s => String(s||'').split(/[,，、]/).map(x=>x.trim()).filter(Boo
 function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('on'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('on'),1800); }
 
 const em = e => String(e||'').trim().toLowerCase();
-const isOwner = () => mode==='local' || (!!user && !!OWNER_EMAIL && em(user.email)===em(OWNER_EMAIL));
+const realOwner = () => mode==='local' || (!!user && !!OWNER_EMAIL && em(user.email)===em(OWNER_EMAIL));
+const isOwner = () => !ui.asVisitor && realOwner();
 const isEditorListed = () => !!user && (DB.meta.editors||[]).map(em).includes(em(user.email));
-const canEdit = () => mode==='local' || isOwner() || isEditorListed();
+const realCanEdit = () => mode==='local' || realOwner() || isEditorListed();
+const canEdit = () => !ui.asVisitor && realCanEdit();
+
+/* ----- 鎖定 ----- */
+const LOCKABLE=['lore','chars','events','stories','paros','sheets','gallery','tlconf'];
+const PAGE_OF={lore:'lore',chars:'lore',events:'lore',tlconf:'lore',stories:'stories',paros:'paro',gallery:'gallery',sheets:'comm',comms:'comm'};
+const PAGE_NAME={lore:'設定',stories:'故事',paro:'PARO',gallery:'畫冊',comm:'委託'};
+const pageLocked = pg => !!(DB.meta.pageLock||{})[pg];
+const hiddenPage = pg => pageLocked(pg) && !canEdit();
+const vis = (col,list) => canEdit()? list.slice() : (hiddenPage(PAGE_OF[col])? [] : list.filter(x=>!x.locked));
+const stubsOf = (col,pred=()=>true) => (canEdit()||hiddenPage(PAGE_OF[col]))? [] : DB.locks.filter(l=>l.col===col && pred(l)).map(l=>({...l, id:l.ref, _stub:true}));
+const isLockedRef = id => DB.locks.some(l=>l.ref===id);
+const LOCK_SVG = '<svg class="lk" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10V7a5 5 0 0 1 10 0v3" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="4.5" y="10" width="15" height="11" rx="1.2" fill="currentColor"/><circle cx="12" cy="15" r="1.6" fill="var(--lockbg,#d8d6d0)"/></svg>';
+const lkMini = x => (x&&x.locked&&canEdit())? `<span class="lk-mini" title="僅限編輯者">${LOCK_SVG}</span>` : '';
+const lockBox = (cls='',txt='') => `<div class="lockbox lb-${cls}">${LOCK_SVG}${txt?`<span>${txt}</span>`:''}</div>`;
+function stubOf(col,o){ return {id:col+'_'+o.id, col, ref:o.id, scope:o.scope||'main', order:o.order??'', sort:o.sort??'', ageA:o.ageA??'', date:o.date||'', category:o.category||''}; }
+function wrapStore(st){
+  const save=st.save, remove=st.remove;
+  st.save=async(c,o)=>{
+    if(LOCKABLE.includes(c) && typeof o.locked!=='boolean') o.locked=false;
+    await save(c,o);
+    if(LOCKABLE.includes(c) && c!=='tlconf'){
+      const sid=c+'_'+o.id;
+      if(o.locked) await save('locks',stubOf(c,o));
+      else if(DB.locks.some(x=>x.id===sid)) await remove('locks',sid);
+    }
+  };
+  st.remove=async(c,id)=>{ await remove(c,id); const sid=c+'_'+id; if(DB.locks.some(x=>x.id===sid)) await remove('locks',sid); };
+  return st;
+}
+function lockPagePanel(pg){
+  return pageHead('', PAGE_NAME[pg]||'', 'Restricted') + lockBox('page','此頁僅限受邀的編輯者瀏覽');
+}
 let myRequest = null;      // 自己送出的申請（非房主）
 DB.requests = [];          // 房主看到的待審核申請
 
 function scopeName(s){ if(!s||s==='main') return '霍洛伊本家'; const p=DB.paros.find(x=>x.id===s); return p? p.name : '（已刪除的 PARO）'; }
 function scopeOptions(){ return [['main','霍洛伊本家'], ...DB.paros.slice().sort(byOrder).map(p=>[p.id,'PARO・'+p.name])]; }
-function charName(id){ const c=DB.chars.find(x=>x.id===id); return c? c.name : null; }
+function charName(id){ const c=DB.chars.find(x=>x.id===id); return (c && !(c.locked&&!canEdit()))? c.name : null; }
 
 /* ---------- 輕量 markdown ---------- */
 function inline(s){
@@ -598,6 +653,7 @@ const STORY_TYPES = ['交流','文章','短篇','草稿','其他'];
 const COMM_STATUS = ['構思中','洽談中','進行中','已完成'];
 const SCHEMA = {
   chars: { title:'角色', fields:[
+    {k:'locked',l:'鎖定',t:'check',hint:'勾選後，沒有受邀的人只會看到一塊灰色鎖定區塊'},
     {k:'name',l:'名字',req:1,half:1},{k:'nameEn',l:'外文名／別名',half:1},
     {k:'scope',l:'所屬',t:'scope',half:1},{k:'order',l:'排序（數字小的在前）',t:'number',half:1},
     {k:'image',l:'立繪／頭像',t:'image'},
@@ -607,6 +663,7 @@ const SCHEMA = {
     {k:'tags',l:'標籤',hint:'用逗號分隔'},
   ]},
   events: { title:'時間軸階段', fields:[
+    {k:'locked',l:'鎖定',t:'check',hint:'勾選後，沒有受邀的人只會看到一塊灰色鎖定區塊'},
     {k:'title',l:'階段標題（中間）',req:1,hint:'例：初識，於夜晚的六角湖相遇'},
     {k:'ageA',l:'A 年齡',t:'number',half:1},{k:'ageB',l:'B 年齡',t:'number',half:1,hint:'留空會依「年齡差」自動算'},
     {k:'textA',l:'A 的經歷',t:'md',half:1,ph:'四年級\n- 畢業',hint:'第一行是小標，下面用「- 」列點'},{k:'textB',l:'B 的經歷',t:'md',half:1,ph:'六年級\n- 畢業，返回義大利'},
@@ -616,11 +673,13 @@ const SCHEMA = {
     {k:'desc',l:'共同備註（可留空）',t:'md'},
   ]},
   lore: { title:'世界觀條目', fields:[
+    {k:'locked',l:'鎖定',t:'check',hint:'勾選後，沒有受邀的人只會看到一塊灰色鎖定區塊'},
     {k:'title',l:'標題',req:1,half:1},{k:'category',l:'分類',half:1,hint:'例：學院、魔法、種族、地理'},
     {k:'scope',l:'所屬',t:'scope',half:1},{k:'order',l:'排序',t:'number',half:1},
     {k:'content',l:'內容',t:'md',tall:1},
   ]},
   stories: { title:'故事', fields:[
+    {k:'locked',l:'鎖定',t:'check',hint:'勾選後，沒有受邀的人只會看到一塊灰色鎖定區塊'},
     {k:'title',l:'標題',req:1},
     {k:'type',l:'類型',t:'select',opts:STORY_TYPES,half:1},{k:'scope',l:'所屬',t:'scope',half:1},
     {k:'author',l:'作者／參與者',half:1},{k:'date',l:'日期',t:'date',half:1},
@@ -632,6 +691,7 @@ const SCHEMA = {
     {k:'content',l:'正文',t:'md',tall:1},
   ]},
   paros: { title:'PARO', fields:[
+    {k:'locked',l:'鎖定',t:'check',hint:'勾選後，沒有受邀的人只會看到一塊灰色鎖定區塊'},
     {k:'name',l:'PARO 名稱',req:1,half:1},{k:'nameEn',l:'副標／外文名',half:1},
     {k:'color',l:'主題色',t:'color',half:1},{k:'order',l:'排序',t:'number',half:1},
     {k:'cover',l:'封面圖',t:'image'},
@@ -639,6 +699,7 @@ const SCHEMA = {
     {k:'content',l:'世界觀概述',t:'md',tall:1},
   ]},
   sheets: { title:'委託用設定', fields:[
+    {k:'locked',l:'鎖定',t:'check',hint:'勾選後，沒有受邀的人只會看到一塊灰色鎖定區塊'},
     {k:'name',l:'角色／項目名稱',req:1,half:1},{k:'charId',l:'對應角色',t:'charSelect',half:1},
     {k:'image',l:'參考主圖',t:'image'},
     {k:'profile',l:'基本資料',t:'kv',defaults:['身高','體重','年齡','種族','職業'],hint:'空白的欄位不會顯示。參考圖會把身高／體重／年齡／種族併成一行，職業另起一行'},
@@ -653,6 +714,7 @@ const SCHEMA = {
     {k:'order',l:'排序',t:'number'},
   ]},
   gallery: { title:'畫冊作品', fields:[
+    {k:'locked',l:'鎖定',t:'check',hint:'勾選後，沒有受邀的人只會看到一塊灰色鎖定區塊'},
     {k:'image',l:'圖片',t:'image',req:1},
     {k:'artist',l:'作者（顯示為 ART. ___）',req:1,half:1},{k:'title',l:'作品名稱（可留空）',half:1},
     {k:'date',l:'日期',t:'date',half:1},{k:'link',l:'作者頁面／原圖連結',t:'url',half:1},
@@ -708,6 +770,7 @@ function fieldHTML(f, v){
       const list=DB.chars.slice().sort(byOrder);
       input = list.length ? `<div class="checks" id="${id}">${list.map(c=>`<label><input type="checkbox" value="${c.id}" ${sel.has(c.id)?'checked':''}>${esc(c.name)}${c.scope&&c.scope!=='main'?`<span class="muted small">・${esc(scopeName(c.scope))}</span>`:''}</label>`).join('')}</div>` : `<div class="muted small">還沒有角色</div>`;
       break; }
+    case 'check': input=`<label class="lockchk"><input type="checkbox" id="${id}" ${val?'checked':''}>${LOCK_SVG}<span>僅限編輯者瀏覽</span></label>`; break;
     case 'kv': {
       let rows=lines(val).map(l=>{ const i=l.search(/[:：]/); return i>0?[l.slice(0,i).trim(),l.slice(i+1).trim()]:['',l.trim()]; });
       const have=new Set(rows.map(r=>r[0]));
@@ -783,6 +846,7 @@ function openEditor(col, item, preset={}){
       if(f.t==='json'){ const v=el.value.trim(); if(!v){ obj[f.k]=null; continue; }
         try{ const j=JSON.parse(v); if(!Array.isArray(j.items)) throw 0; obj[f.k]=j; }catch{ toast('噗文 JSON 格式不正確'); return; } continue; }
       if(f.t==='chars'){ obj[f.k]= el? [...el.querySelectorAll('input:checked')].map(x=>x.value) : []; continue; }
+      if(f.t==='check'){ obj[f.k]=!!el.checked; continue; }
       if(f.t==='images'){ obj[f.k]=imgsData[f.k]||[]; continue; }
       if(f.t==='kv'){ obj[f.k]=[...el.querySelectorAll('.kv-row')].map(r=>[r.querySelector('.kv-k').value.trim(), r.querySelector('.kv-v').value.trim()]).filter(([k,v])=>v).map(([k,v])=>k?`${k}：${v}`:v).join('\n'); continue; }
       if(f.t==='image'){ const typed=el.value.trim(); obj[f.k]= typed || (imgData[f.k]===null? '' : (imgData[f.k]||'')); continue; }
@@ -806,18 +870,19 @@ function openEditor(col, item, preset={}){
 const editBtn = (col,id,extra='') => canEdit()? `<div class="edit-row ${extra}"><button class="btn sm" data-edit="${col}:${id}">編輯</button></div>`:'';
 const addBtn = (col,label,preset) => canEdit()? `<button class="btn" data-add="${col}" ${preset?`data-preset='${esc(JSON.stringify(preset))}'`:''}>＋ ${label}</button>`:'';
 const emptyBox = (msg, btn='') => `<div class="empty"><svg viewBox="0 0 40 40" fill="none" stroke="currentColor"><ellipse cx="20" cy="22" rx="14" ry="15"/><ellipse cx="20" cy="24" rx="8" ry="9"/></svg><div>${msg}</div>${btn?`<div style="margin-top:14px">${btn}</div>`:''}</div>`;
-const pageHead = (num,zh,en,right='') => `<div class="page-head"><div class="num">${num} /</div><h1>${zh}<span class="en">${en}</span></h1><div class="toolbar" style="margin:0">${right}</div></div>`;
+const pageLockBtn = pg => isOwner()? `<button class="btn ${pageLocked(pg)?'pri':''}" data-pagelock="${pg}" title="整頁鎖定">${LOCK_SVG}${pageLocked(pg)?'已鎖定此頁':'鎖定此頁'}</button>` : (canEdit()&&pageLocked(pg)? `<span class="badge">${LOCK_SVG}此頁僅限編輯者</span>`:'');
+const pageHead = (num,zh,en,right='') => `<div class="page-head"><div class="num">${num?num+' /':''}</div><h1>${zh}<span class="en">${en}</span></h1><div class="toolbar" style="margin:0">${right}</div></div>`;
 
 function charCard(c){
   return `<div class="card char-card" data-go="char-${c.id}">
     ${editBtn('chars',c.id)}
     <div class="portrait">${imgTag(c.image,c.name)}</div>
-    <div class="body"><h3>${esc(c.name)}</h3>${c.nameEn?`<div class="en">${esc(c.nameEn)}</div>`:''}
+    <div class="body"><h3>${lkMini(c)}${esc(c.name)}</h3>${c.nameEn?`<div class="en">${esc(c.nameEn)}</div>`:''}
     ${c.quote?`<div class="quote">「${esc(c.quote)}」</div>`:''}</div></div>`;
 }
 function storyRow(s){
   return `<div class="row" data-go="story-${s.id}"><span class="date">${esc(s.date||'')}</span>
-    <span class="t"><b>${esc(s.title)}</b><span class="muted">${esc(s.author||'')}</span></span>
+    <span class="t"><b>${lkMini(s)}${esc(s.title)}</b><span class="muted">${esc(s.author||'')}</span></span>
     <span><span class="chip sea">${esc(s.type||'')}</span>${s.scope&&s.scope!=='main'?`<span class="chip vein">${esc(scopeName(s.scope))}</span>`:''}</span></div>`;
 }
 function charChips(ids){ return (ids||[]).map(id=>{ const n=charName(id); return n?`<a class="chip vein" data-go="char-${id}">${esc(n)}</a>`:''; }).join(''); }
@@ -832,13 +897,13 @@ function lastUpdated(){
 /* ----- 首頁 ----- */
 function viewHome(){
   const m=DB.meta;
-  const mains=DB.chars.filter(c=>(c.scope||'main')==='main').sort(byOrder);
+  const mains=vis('chars',DB.chars).filter(c=>(c.scope||'main')==='main').sort(byOrder);
   const duo=mains.slice(0,2);
-  const recent=DB.stories.slice().sort(byDateDesc).slice(0,6);
-  const paros=DB.paros.slice().sort(byOrder);
+  const recent=vis('stories',DB.stories).sort(byDateDesc).slice(0,6);
+  const paros=vis('paros',DB.paros).sort(byOrder);
   return `
   <section class="hero">
-    <div class="hero-side"><div>Holloy Academy</div><div>Alt. 21st c. England</div><div>Record No. ${String(DB.stories.length).padStart(3,'0')}</div></div>
+    <div class="hero-side"><div>Holloy Academy</div><div>Alt. 21st c. England</div><div>Record No. ${String(vis('stories',DB.stories).length).padStart(3,'0')}</div></div>
     <div class="hero-main">
       <div class="titlebox"><h1 aria-label="${esc(m.title||'沙蟲海珀')}">${[...(m.title||'沙蟲海珀')].map(ch=>`<span>${esc(ch)}</span>`).join('')}</h1>
         <div class="cells"><span title="最後更新">${esc(lastUpdated())}</span></div></div>
@@ -864,7 +929,7 @@ function viewHome(){
   <h2 class="sec">世界 <span class="en">Worlds</span></h2>
   <div class="grid g3">
     <div class="card link" data-go="lore"><h3>霍洛伊本家</h3><div class="en">Holloy Academy</div>
-      <div class="sum" style="margin-top:8px">${DB.lore.filter(x=>(x.scope||'main')==='main').length} 個世界觀條目・${mains.length} 位角色・${DB.events.filter(x=>(x.scope||'main')==='main').length} 個時間軸事件</div></div>
+      <div class="sum" style="margin-top:8px">${vis('lore',DB.lore).filter(x=>(x.scope||'main')==='main').length} 個世界觀條目・${mains.length} 位角色・${vis('events',DB.events).filter(x=>(x.scope||'main')==='main').length} 個時間軸事件</div></div>
     ${paros.map(p=>`<div class="card link" data-go="paro-${p.id}" style="border-top:3px solid ${esc(p.color||'#ad3328')}"><h3>${esc(p.name)}</h3>${p.nameEn?`<div class="en">${esc(p.nameEn)}</div>`:''}<div class="sum" style="margin-top:8px">${esc(p.summary||'')}</div></div>`).join('')}
   </div>`;
 }
@@ -879,24 +944,26 @@ function scopeTabs(scope){
 }
 function scopeBody(scope,t){
   const inScope = x => (x.scope||'main')===scope;
+  if(['world','chars','time'].includes(t) && hiddenPage('lore')) return lockBox('page','這部分僅限受邀的編輯者瀏覽');
   if(t==='world'){
-    const items=DB.lore.filter(inScope).sort(byOrder);
+    const items=[...vis('lore',DB.lore).filter(inScope), ...stubsOf('lore',inScope)].sort(byOrder);
     const cats=[...new Set(items.map(x=>x.category||'未分類'))];
     return `<div class="toolbar">${addBtn('lore','新增條目',{scope})}</div>` + (items.length? cats.map(cat=>`
       <h2 class="sec">${esc(cat)}</h2>
-      <div class="grid" style="gap:14px">${items.filter(x=>(x.category||'未分類')===cat).map(x=>`
+      <div class="grid" style="gap:14px">${items.filter(x=>(x.category||'未分類')===cat).map(x=> x._stub? lockBox('row') : `
         <div class="card"><div class="top-right">${editBtn('lore',x.id)}</div>
-        <h3>${esc(x.title)}</h3><div class="prose" style="margin-top:8px">${md(x.content)}</div></div>`).join('')}</div>`).join('')
+        <h3>${lkMini(x)}${esc(x.title)}</h3><div class="prose" style="margin-top:8px">${md(x.content)}</div></div>`).join('')}</div>`).join('')
       : emptyBox('還沒有世界觀條目'));
   }
   if(t==='chars'){
-    const items=DB.chars.filter(inScope).sort(byOrder);
-    return `<div class="toolbar">${addBtn('chars','新增角色',{scope})}</div>` + (items.length?`<div class="grid g4">${items.map(charCard).join('')}</div>`:emptyBox('還沒有角色'));
+    const items=[...vis('chars',DB.chars).filter(inScope), ...stubsOf('chars',inScope)].sort(byOrder);
+    return `<div class="toolbar">${addBtn('chars','新增角色',{scope})}</div>` + (items.length?`<div class="grid g4">${items.map(x=>x._stub? `<div class="char-card lock-char">${lockBox('portrait')}</div>` : charCard(x)).join('')}</div>`:emptyBox('還沒有角色'));
   }
   if(t==='time') return renderTimeline(scope);
   if(t==='stories'){
-    const items=DB.stories.filter(inScope).sort(byDateDesc);
-    return `<div class="toolbar">${addBtn('stories','新增故事',{scope})}</div>` + (items.length?`<div class="rows">${items.map(storyRow).join('')}</div>`:emptyBox('這個 PARO 還沒有故事'));
+    if(hiddenPage('stories')) return lockBox('page','這部分僅限受邀的編輯者瀏覽');
+    const items=[...vis('stories',DB.stories).filter(inScope), ...stubsOf('stories',inScope)].sort(byDateDesc);
+    return `<div class="toolbar">${addBtn('stories','新增故事',{scope})}</div>` + (items.length?`<div class="rows">${items.map(x=>x._stub? `<div class="row lock-row">${lockBox('inline')}</div>` : storyRow(x)).join('')}</div>`:emptyBox('這個 PARO 還沒有故事'));
   }
   return '';
 }
@@ -907,7 +974,7 @@ function tlConf(scope){
   let pool=DB.chars.filter(x=>(x.scope||'main')===scope).sort(byOrder);
   if(pool.length<2) pool=[...pool, ...DB.chars.filter(x=>(x.scope||'main')==='main').sort(byOrder)];
   const a=c.a||pool[0]?.id||'', b=c.b||pool.find(x=>x.id!==a)?.id||'';
-  return { heading:c.heading||'', a, b, gap:c.gap??'', nameA:charName(a)||'A', nameB:charName(b)||'B' };
+  return { heading:c.heading||'', a, b, gap:c.gap??'', nameA:charName(a)||(a&&!canEdit()?'—':'A'), nameB:charName(b)||(b&&!canEdit()?'—':'B') };
 }
 const tlKey = e => String(e.sort!==''&&e.sort!=null ? e.sort : (e.ageA??''));
 const tlSort = (x,y) => tlKey(x).localeCompare(tlKey(y),undefined,{numeric:true}) || String(x.title||'').localeCompare(String(y.title||''));
@@ -920,7 +987,8 @@ function tlCol(txt, side){
 }
 function renderTimeline(scope){
   const cf=tlConf(scope);
-  const items=DB.events.filter(x=>(x.scope||'main')===scope).sort(tlSort);
+  const inS=x=>(x.scope||'main')===scope;
+  const items=[...vis('events',DB.events).filter(inS), ...stubsOf('events',inS)].sort(tlSort);
   const age=v=> (v===''||v==null)? '—' : esc(v)+'Y';
   const head=`<div class="tl2-top">
       <div class="mono small muted" style="letter-spacing:.16em">TIMELINE ／ ${esc(scopeName(scope))}</div>
@@ -930,6 +998,7 @@ function renderTimeline(scope){
     </div>`;
   if(!items.length) return head+emptyBox('時間軸是空的');
   return head+`<div class="tl2">${items.map((e,i)=>{
+    if(e._stub) return `<article class="tl2-item"><div class="tl2-num"><span>${String(i+1).padStart(2,'0')}</span><i></i><em></em></div><div class="tl2-body">${lockBox('tl')}</div></article>`;
     const st=e.storyId && DB.stories.find(x=>x.id===e.storyId);
     const linkTxt=e.link || (st? st.title : '');
     return `<article class="tl2-item">
@@ -937,7 +1006,7 @@ function renderTimeline(scope){
       <div class="tl2-body">
         <div class="edit-row" style="position:absolute;right:0;top:-30px">${canEdit()?`<button class="btn sm" data-edit="events:${e.id}">編輯</button>`:''}</div>
         <div class="tl2-ages"><span><b>${age(e.ageA)}</b>${esc(cf.nameA)}</span><span>${esc(cf.nameB)}<b>${age(e.ageB)}</b></span></div>
-        <h3 class="tl2-title">${esc(e.title)}</h3>
+        <h3 class="tl2-title">${lkMini(e)}${esc(e.title)}</h3>
         ${linkTxt?`<div class="tl2-link">${st?`<a data-go="story-${st.id}">${esc(linkTxt)}</a>`:esc(linkTxt)}</div>`:''}
         <div class="tl2-cols">${tlCol(e.textA,'a')}${tlCol(e.textB,'b')}</div>
         ${e.desc?`<div class="tl2-desc prose">${md(e.desc)}</div>`:''}
@@ -961,17 +1030,17 @@ function openTlConf(scope){
 }
 
 /* ----- 設定 ----- */
-function viewLore(){ return pageHead('01','設定','Holloy Academy · 霍洛伊本家') + scopeTabs('main'); }
+function viewLore(){ return pageHead('01','設定','Holloy Academy · 霍洛伊本家', pageLockBtn('lore')) + scopeTabs('main'); }
 
 /* ----- 角色詳細 ----- */
 function viewChar(id){
-  const c=DB.chars.find(x=>x.id===id);
-  if(!c) return emptyBox('找不到這個角色');
+  const c=vis('chars',DB.chars).find(x=>x.id===id);
+  if(!c) return isLockedRef(id)||hiddenPage('lore')? lockBox('page','這個角色僅限受邀的編輯者瀏覽') : emptyBox('找不到這個角色');
   const f=lines(c.fields).map(l=>{ const i=l.search(/[:：]/); return i>0?[l.slice(0,i),l.slice(i+1)]:['',l]; });
-  const evs=DB.events.filter(e=>{ const cf=tlConf(e.scope||'main'); return (e.chars||[]).includes(id) || (cf.a===id && (e.textA||e.ageA!=='')) || (cf.b===id && (e.textB||e.ageB!=='')); }).sort(tlSort)
+  const evs=vis('events',DB.events).filter(e=>{ const cf=tlConf(e.scope||'main'); return (e.chars||[]).includes(id) || (cf.a===id && (e.textA||e.ageA!=='')) || (cf.b===id && (e.textB||e.ageB!=='')); }).sort(tlSort)
     .map(e=>{ const cf=tlConf(e.scope||'main'); const ag= cf.a===id? e.ageA : cf.b===id? e.ageB : ''; return {...e, _when: (ag!==''&&ag!=null? ag+'Y' : '') || e.when || ''}; });
-  const sts=DB.stories.filter(s=>(s.chars||[]).includes(id)).sort(byDateDesc);
-  const sheet=DB.sheets.find(s=>s.charId===id);
+  const sts=vis('stories',DB.stories).filter(s=>(s.chars||[]).includes(id)).sort(byDateDesc);
+  const sheet=vis('sheets',DB.sheets).find(s=>s.charId===id);
   const back = (c.scope&&c.scope!=='main')? `paro-${c.scope}` : 'lore';
   return `<div class="toolbar"><a class="btn ghost sm" data-go="${back}">← ${esc(scopeName(c.scope))}</a><span style="flex:1"></span>${canEdit()?`<button class="btn sm" data-edit="chars:${c.id}">編輯角色</button>`:''}</div>
   <div class="char-detail">
@@ -994,7 +1063,8 @@ function viewChar(id){
 /* ----- 故事 ----- */
 function storyFiltered(){
   const q=ui.storyQ.trim().toLowerCase();
-  return DB.stories.filter(s=>{
+  return [...vis('stories',DB.stories), ...stubsOf('stories')].filter(s=>{
+    if(s._stub) return !ui.storyQ.trim() && !ui.storyType && (!ui.storyScope || (s.scope||'main')===ui.storyScope);
     if(ui.storyScope && (s.scope||'main')!==ui.storyScope) return false;
     if(ui.storyType && s.type!==ui.storyType) return false;
     if(q){ const hay=[s.title,s.summary,s.tags,s.author,...(s.chars||[]).map(charName)].join(' ').toLowerCase(); if(!hay.includes(q)) return false; }
@@ -1004,18 +1074,18 @@ function storyFiltered(){
 function storyCards(){
   const list=storyFiltered();
   if(!list.length) return emptyBox(DB.stories.length?'沒有符合條件的故事':'還沒有收錄任何故事');
-  return `<div class="grid g2">${list.map(s=>`
+  return `<div class="grid g2">${list.map(s=> s._stub? `<div class="card">${lockBox('row')}</div>` : `
     <div class="card link" data-go="story-${s.id}">
       <div class="top-right">${editBtn('stories',s.id)}</div>
       <div><span class="chip sea">${esc(s.type||'其他')}</span><span class="chip ${s.scope&&s.scope!=='main'?'vein':''}">${esc(scopeName(s.scope))}</span></div>
-      <h3 style="margin-top:8px">${esc(s.title)}</h3>
+      <h3 style="margin-top:8px">${lkMini(s)}${esc(s.title)}</h3>
       <div class="meta">${esc(s.date||'')}${s.author?'・'+esc(s.author):''}</div>
       ${s.summary?`<div class="sum">${esc(s.summary)}</div>`:''}
       <div style="margin-top:8px">${(s.chars||[]).map(id=>charName(id)).filter(Boolean).map(n=>`<span class="chip vein">${esc(n)}</span>`).join('')}${tagsOf(s.tags).map(t=>`<span class="chip">#${esc(t)}</span>`).join('')}</div>
     </div>`).join('')}</div>`;
 }
 function viewStories(){
-  return pageHead('02','故事','Stories & Exchanges', (canEdit()?`<label class="btn" style="margin:0">⇪ 匯入噗文 JSON<input type="file" accept=".json,application/json" hidden data-plurkimport></label>`:'') + addBtn('stories','新增故事')) + `
+  return pageHead('02','故事','Stories & Exchanges', pageLockBtn('stories') + (canEdit()?`<label class="btn" style="margin:0">⇪ 匯入噗文 JSON<input type="file" accept=".json,application/json" hidden data-plurkimport></label>`:'') + addBtn('stories','新增故事')) + `
   <div class="toolbar">
     <input id="sq" type="text" placeholder="搜尋標題、摘要、標籤、角色…" value="${esc(ui.storyQ)}">
     <select id="ss"><option value="">全部世界</option>${scopeOptions().map(([k,n])=>`<option value="${k}" ${ui.storyScope===k?'selected':''}>${esc(n)}</option>`).join('')}</select>
@@ -1087,9 +1157,9 @@ function importPlurkFile(file){
 }
 
 function viewStory(id){
-  const s=DB.stories.find(x=>x.id===id);
-  if(!s) return emptyBox('找不到這篇故事');
-  const list=DB.stories.slice().sort(byDateDesc); const i=list.findIndex(x=>x.id===id);
+  const s=vis('stories',DB.stories).find(x=>x.id===id);
+  if(!s) return isLockedRef(id)? lockBox('page','這篇故事僅限受邀的編輯者瀏覽') : emptyBox('找不到這篇故事');
+  const list=vis('stories',DB.stories).sort(byDateDesc); const i=list.findIndex(x=>x.id===id);
   const prev=list[i+1], next=list[i-1];
   return `<div class="toolbar"><a class="btn ghost sm" data-go="stories">← 故事</a><span style="flex:1"></span>${canEdit()?`<button class="btn sm" data-edit="stories:${s.id}">編輯</button>`:''}</div>
   <article class="reader">
@@ -1112,20 +1182,21 @@ function viewStory(id){
 
 /* ----- PARO ----- */
 function viewParos(){
-  const ps=DB.paros.slice().sort(byOrder);
-  return pageHead('03','PARO 總覽','Parallel Worlds', (ps.length?`<button class="btn" data-paro-list>☰ ${canEdit()?'條列／排序':'條列'}</button>`:'') + addBtn('paros','新增 PARO')) +
+  const ps=[...vis('paros',DB.paros), ...stubsOf('paros')].sort(byOrder);
+  return pageHead('03','PARO 總覽','Parallel Worlds', pageLockBtn('paro') + (ps.length?`<button class="btn" data-paro-list>☰ ${canEdit()?'條列／排序':'條列'}</button>`:'') + addBtn('paros','新增 PARO')) +
     (ps.length?`<div class="grid g3">${ps.map(p=>{
-      const n={c:DB.chars.filter(x=>x.scope===p.id).length, s:DB.stories.filter(x=>x.scope===p.id).length};
+      if(p._stub) return `<div class="card paro-card">${lockBox('cover')}</div>`;
+      const n={c:vis('chars',DB.chars).filter(x=>x.scope===p.id).length, s:vis('stories',DB.stories).filter(x=>x.scope===p.id).length};
       return `<div class="card paro-card" data-go="paro-${p.id}" style="--accent:${esc(p.color||'#ad3328')}">
         ${editBtn('paros',p.id).replace('edit-row','edit-row" style="position:absolute;top:10px;right:10px;z-index:2')}
         <div class="cover">${p.cover?imgTag(p.cover,''):''}</div>
-        <div class="body"><h3>${esc(p.name)}</h3>${p.nameEn?`<div class="en">${esc(p.nameEn)}</div>`:''}
+        <div class="body"><h3>${lkMini(p)}${esc(p.name)}</h3>${p.nameEn?`<div class="en">${esc(p.nameEn)}</div>`:''}
         <div class="sum" style="margin-top:6px">${esc(p.summary||'')}</div>
         <div class="meta" style="margin:8px 0 0">${n.c} 位角色・${n.s} 篇故事</div></div></div>`; }).join('')}</div>`
     : emptyBox('還沒有建立任何 PARO', addBtn('paros','新增 PARO')));
 }
 function openParoList(){
-  const ps=DB.paros.slice().sort(byOrder), ed=canEdit();
+  const ps=vis('paros',DB.paros).sort(byOrder), ed=canEdit();
   const m=openModal(`<h2>PARO 條列</h2>
     ${ed?`<p class="small muted" style="margin:-8px 0 14px">長按任一列（電腦可直接按住）上下拖曳來調整順序，完成後按「儲存排序」。</p>`:''}
     <ol class="sortlist ${ed?'can':''}" id="sortList">${ps.map(p=>`
@@ -1174,8 +1245,8 @@ function makeSortable(list, onChange){
   list.addEventListener('contextmenu',e=>e.preventDefault());
 }
 function viewParo(id){
-  const p=DB.paros.find(x=>x.id===id);
-  if(!p) return emptyBox('找不到這個 PARO');
+  const p=vis('paros',DB.paros).find(x=>x.id===id);
+  if(!p) return isLockedRef(id)? lockBox('page','這個 PARO 僅限受邀的編輯者瀏覽') : emptyBox('找不到這個 PARO');
   return `<div class="toolbar"><a class="btn ghost sm" data-go="paro">← PARO 總覽</a><span style="flex:1"></span>${canEdit()?`<button class="btn sm" data-edit="paros:${p.id}">編輯 PARO</button>`:''}</div>
   <div class="paro-head" style="--accent:${esc(p.color||'#ad3328')}">
     <div class="mono small muted" style="letter-spacing:.2em">PARALLEL WORLD</div>
@@ -1246,12 +1317,16 @@ async function exportRefSheet(id){
     const h2c=await loadH2C();
     await Promise.all([...host.querySelectorAll('img')].map(im=>im.complete?0:new Promise(r=>{ im.onload=im.onerror=r; })));
     try{ await document.fonts.ready; }catch{}
-    const canvas=await h2c(host.firstElementChild,{scale:2,backgroundColor:'#F0F0F0',useCORS:true,logging:false});
+    const raw=await h2c(host.firstElementChild,{scale:2,backgroundColor:'#F0F0F0',useCORS:true,logging:false});
+    // 補到 500 的倍數（上下平均留白）
+    const W=Math.ceil(raw.width/500)*500, H=Math.ceil(raw.height/500)*500;
+    const canvas=document.createElement('canvas'); canvas.width=W; canvas.height=H;
+    const cg=canvas.getContext('2d'); cg.fillStyle='#F0F0F0'; cg.fillRect(0,0,W,H);
+    cg.drawImage(raw, Math.floor((W-raw.width)/2), Math.floor((H-raw.height)/2));
     const url=canvas.toDataURL('image/png');
     const fname=`${s.name}-委託參考-${today()}.png`;
     const m2=openModal(`<h2>參考圖・${esc(s.name)}</h2>
       <div class="lb-img" style="max-height:66vh;overflow:auto"><img src="${url}" alt="" style="max-height:none;width:100%"></div>
-      <div class="hint small muted" style="margin-top:8px">按「下載 PNG」存檔；手機也可以長按圖片儲存。用網址插入的圖片如果沒出現，是對方網站不允許跨站讀取，改用上傳即可。</div>
       <div class="modal-foot"><span class="mono small muted">${canvas.width} × ${canvas.height}px</span><div><button class="btn ghost" data-x>關閉</button> <a class="btn pri" id="rsDl" href="${url}" download="${esc(fname)}">⇩ 下載 PNG</a></div></div>`,'wide');
     m2.querySelector('[data-x]').onclick=closeModal;
   }catch(err){
@@ -1262,23 +1337,23 @@ async function exportRefSheet(id){
 
 /* ----- 畫冊 ----- */
 function viewGallery(){
-  const all=DB.gallery.slice().sort(byDateDesc);
+  const all=[...vis('gallery',DB.gallery), ...stubsOf('gallery')].sort(byDateDesc);
   const used=[...new Set(all.flatMap(g=>g.chars||[]))].filter(id=>charName(id));
   const f=ui.galChar||'';
-  const list=f? all.filter(g=>(g.chars||[]).includes(f)) : all;
-  return pageHead('04','畫冊','Gallery', addBtn('gallery','新增作品')) +
+  const list=f? all.filter(g=>!g._stub&&(g.chars||[]).includes(f)) : all;
+  return pageHead('04','畫冊','Gallery', pageLockBtn('gallery') + addBtn('gallery','新增作品')) +
     (used.length?`<div class="gal-filter"><button class="${!f?'on':''}" data-galchar="">ALL</button>${used.map(id=>`<button class="${f===id?'on':''}" data-galchar="${id}">${esc(charName(id))}</button>`).join('')}</div>`:'') +
-    (list.length?`<div class="gal">${list.map(g=>`
+    (list.length?`<div class="gal">${list.map(g=> g._stub? `<figure class="gal-item">${lockBox('tile')}</figure>` : `
       <figure class="gal-item">
         ${canEdit()?`<div class="edit-row"><button class="btn sm" data-edit="gallery:${g.id}">編輯</button></div>`:''}
         <div class="gal-img" data-gal="${g.id}">${g.image?`<img src="${esc(g.image)}" alt="${esc(g.title||'')}" loading="lazy">`:''}</div>
-        <figcaption><span class="gal-art">ART.<b>${esc(g.artist||'—')}</b></span>${g.title?`<span class="gal-title">${esc(g.title)}</span>`:''}</figcaption>
+        <figcaption><span class="gal-art">${lkMini(g)}ART.<b>${esc(g.artist||'—')}</b></span>${g.title?`<span class="gal-title">${esc(g.title)}</span>`:''}</figcaption>
       </figure>`).join('')}</div>`
     : emptyBox(DB.gallery.length?'這個角色還沒有作品':'畫冊還是空的', addBtn('gallery','新增作品')));
 }
 function openGalleryItem(id){
   const g=DB.gallery.find(x=>x.id===id); if(!g) return;
-  const list=DB.gallery.slice().sort(byDateDesc).filter(x=>!ui.galChar||(x.chars||[]).includes(ui.galChar));
+  const list=vis('gallery',DB.gallery).sort(byDateDesc).filter(x=>!ui.galChar||(x.chars||[]).includes(ui.galChar));
   const i=list.findIndex(x=>x.id===id), prev=list[i-1], next=list[i+1];
   const m=openModal(`<div class="lb">
       <div class="lb-img">${g.image?`<img src="${esc(g.image)}" alt="">`:''}</div>
@@ -1298,18 +1373,17 @@ function openGalleryItem(id){
 }
 
 function viewComm(){
-  const t=ui.commTab;
-  const head = pageHead('※','委託設定','Commissions');
-  const tabs = `<div class="tabs" id="commTabs"><button data-ct="sheets" class="${t==='sheets'?'on':''}">委託用設定</button><button data-ct="log" class="${t==='log'?'on':''}">委託紀錄</button></div>`;
-  if(t==='sheets'){
-    const ss=DB.sheets.slice().sort(byOrder);
-    return head+tabs+`<div class="toolbar">${addBtn('sheets','新增委託用設定')}<span class="muted small">給繪師／寫手看的外觀重點與配色，點色票可複製色碼</span></div>`+
+  const head = pageHead('※','委託設定','Commission references', pageLockBtn('comm'));
+  {
+    const ss=[...vis('sheets',DB.sheets), ...stubsOf('sheets')].sort(byOrder);
+    return head+`<div class="toolbar">${addBtn('sheets','新增委託用設定')}<span class="muted small">給繪師／寫手看的外觀重點與配色，點色票可複製色碼</span></div>`+
      (ss.length? `<div class="grid" style="gap:20px">${ss.map(s=>{
+       if(s._stub) return `<div class="card">${lockBox('sheet')}</div>`;
        const cols=lines(s.colors).map(l=>{ const m=l.match(/(#[0-9a-fA-F]{3,8})\s*(.*)/); return m?[m[1],m[2]]:null; }).filter(Boolean);
        const refs=lines(s.refs);
        return `<div class="card"><div class="top-right">${editBtn('sheets',s.id)}</div>
         <div class="sheet"><div><div class="portrait" style="border-radius:var(--r)">${imgTag(s.image,s.name)}</div></div>
-        <div><h3 style="font-size:22px">${esc(s.name)}</h3>${s.charId&&charName(s.charId)?`<a class="small" data-go="char-${s.charId}">角色頁 →</a>`:''}
+        <div><h3 style="font-size:22px">${lkMini(s)}${esc(s.name)}</h3>${s.charId&&charName(s.charId)?`<a class="small" data-go="char-${s.charId}">角色頁 →</a>`:''}
           ${lines(s.profile).length?`<dl class="fields" style="font-size:14.5px;margin:12px 0">${lines(s.profile).map(l=>{ const i=l.search(/[:：]/); return i>0?`<dt>${esc(l.slice(0,i))}</dt><dd>${esc(l.slice(i+1))}</dd>`:`<dt></dt><dd>${esc(l)}</dd>`; }).join('')}</dl>`:''}
           ${s.intro?`<div class="sheet-intro">${esc(s.intro).replace(/\n/g,'<br>')}</div>`:''}
           ${cols.length?`<div class="swatches">${cols.map(([h,n])=>`<span class="sw" data-copy="${esc(h)}"><i style="background:${esc(h)}"></i><b>${esc(n||'—')}</b><em>${esc(h.toUpperCase())}</em></span>`).join('')}</div>`:''}
@@ -1322,18 +1396,6 @@ function viewComm(){
           <div style="margin-top:16px"><button class="btn" data-refsheet="${s.id}">⇩ 匯出參考圖</button></div>
         </div></div></div>`; }).join('')}</div>` : emptyBox('還沒有委託用設定'));
   }
-  const cs=DB.comms.slice().sort(byDateDesc);
-  return head+tabs+`<div class="toolbar">${addBtn('comms','新增委託紀錄')}</div>`+
-    (cs.length?`<div class="grid g3">${cs.map(c=>`<div class="card">
-      <div class="top-right" style="z-index:2">${editBtn('comms',c.id)}</div>
-      <div class="comm-img">${c.image?imgTag(c.image,'◦'):'◦'}</div>
-      <div><span class="status st-${esc(c.status||'構思中')}">${esc(c.status||'構思中')}</span></div>
-      <h3 style="margin-top:8px">${esc(c.title)}</h3>
-      <div class="meta">${esc(c.artist||'')}${c.date?'・'+esc(c.date):''}${c.price?'・'+esc(c.price):''}</div>
-      <div>${charChips(c.chars)}</div>
-      ${c.notes?`<details style="margin-top:8px"><summary class="small muted" style="cursor:pointer">需求與筆記</summary><div class="prose" style="font-size:14px;margin-top:6px">${md(c.notes)}</div></details>`:''}
-      ${c.link?`<div style="margin-top:8px"><a class="small" href="${esc(c.link)}" target="_blank" rel="noopener">連結 ↗</a></div>`:''}
-    </div>`).join('')}</div>`:emptyBox('還沒有委託紀錄'));
 }
 
 /* ----- 網站設定 ----- */
@@ -1473,7 +1535,9 @@ function render(){
   document.querySelectorAll('#nav a').forEach(a=>{ const g=a.dataset.go; a.classList.toggle('on', g===p || (g==='lore'&&p==='char') || (g==='stories'&&p==='story')); });
   const banner = mode==='local' ? `<div class="banner">預覽模式：目前沒有接上 Firebase，內容只會存在這個瀏覽器裡。填好 config.js 並部署後就會連上 Firebase。</div>` : '';
   let html='';
-  switch(p){
+  const grp={lore:'lore',char:'lore',stories:'stories',story:'stories',paro:'paro',gallery:'gallery',comm:'comm'}[p];
+  if(grp && hiddenPage(grp)) html=lockPagePanel(grp);
+  else switch(p){
     case 'lore': html=viewLore(); break;
     case 'char': html=viewChar(id); break;
     case 'stories': html=viewStories(); break;
@@ -1483,9 +1547,10 @@ function render(){
     case 'gallery': html=viewGallery(); break;
     default: html=viewHome();
   }
-  $('#app').innerHTML = banner + html;
+  const vb = ui.asVisitor? `<div class="banner" style="border-color:var(--sage);color:var(--sage);display:flex;justify-content:space-between;align-items:center">目前是「訪客視角」預覽：鎖定的內容會顯示成灰色鎖定區塊。<button class="btn sm ghost" data-asvisitor>結束預覽</button></div>` : '';
+  $('#app').innerHTML = banner + vb + html;
   $('#brandName').textContent = DB.meta.title || '沙蟲海珀';
-  document.title = (DB.meta.title||'沙蟲海珀') + ' · ' + (DB.meta.subtitle||'達魯 & 丹德里提');
+  document.title = DB.meta.title||'沙蟲海珀';
   $('#foot').innerHTML = `<span>${esc(DB.meta.title||'沙蟲海珀')}${DB.meta.subtitle?' — '+esc(DB.meta.subtitle):''}</span><span>Holloy Academy Archive</span>`;
   renderAuth();
 }
@@ -1493,7 +1558,8 @@ let _raf=0; function schedule(){ cancelAnimationFrame(_raf); _raf=requestAnimati
 
 function renderAuth(){
   const a=$('#auth');
-  if(mode==='local'){ a.innerHTML=`<span class="badge warn">預覽模式</span><button class="btn sm ghost" data-members>成員</button><button class="btn sm ghost" data-settings title="網站設定">⚙</button>`; return; }
+  const vt = realCanEdit()? `<button class="btn sm ${ui.asVisitor?'pri':'ghost'}" data-asvisitor title="用訪客的角度看網站">訪客視角</button>` : '';
+  if(mode==='local'){ a.innerHTML=`<span class="badge warn">預覽模式</span>${vt}<button class="btn sm ghost" data-members>成員</button><button class="btn sm ghost" data-settings title="網站設定">⚙</button>`; return; }
   if(!user){ a.innerHTML=`<button class="btn sm" data-login>Google 登入</button>`; return; }
   const role = isOwner()?'房主':canEdit()?'編輯者':'僅瀏覽';
   const n = isOwner()? DB.requests.length : 0;
@@ -1501,7 +1567,7 @@ function renderAuth(){
     <span class="badge ${canEdit()?'ok':''}" title="${esc(user.email)}">${role}</span>
     ${isOwner()?`<button class="btn sm ghost" data-members title="成員管理">成員${n?`<span style="background:var(--red);color:var(--paper);font-size:10px;padding:0 5px;margin-left:4px">${n}</span>`:''}</button>`:''}
     ${!canEdit()?`<button class="btn sm" data-request>${myRequest?'申請中…':'申請編輯'}</button>`:''}
-    ${canEdit()?'<button class="btn sm ghost" data-settings title="網站設定">⚙</button>':''}
+    ${vt}${canEdit()?'<button class="btn sm ghost" data-settings title="網站設定">⚙</button>':''}
     <button class="btn sm ghost" data-logout>登出</button>`;
 }
 
@@ -1511,6 +1577,10 @@ document.addEventListener('click',e=>{
   const ad=t.closest('[data-add]'); if(ad){ e.stopPropagation(); openEditor(ad.dataset.add, null, ad.dataset.preset?JSON.parse(ad.dataset.preset):{}); return; }
   if(t.closest('[data-settings]')){ openSettings(); return; }
   if(t.closest('[data-members]')){ openMembers(); return; }
+  if(t.closest('[data-asvisitor]')){ ui.asVisitor=!ui.asVisitor; closeModal(); render(); return; }
+  const pl2=t.closest('[data-pagelock]'); if(pl2){ const pg=pl2.dataset.pagelock; const on=!pageLocked(pg);
+    askConfirm(on?`鎖定「${PAGE_NAME[pg]}」整頁？沒有受邀的人只會看到一塊鎖定區塊。`:`把「${PAGE_NAME[pg]}」改回公開？`).then(async ok=>{ if(!ok) return;
+      try{ await store.saveMeta({...DB.meta, updatedAt:Date.now(), pageLock:{...(DB.meta.pageLock||{}), [pg]:on}}); toast(on?'已鎖定':'已公開'); }catch(err){ toast('失敗：'+(err.code||err.message)); } }); return; }
   const tc=t.closest('[data-tlconf]'); if(tc){ openTlConf(tc.dataset.tlconf); return; }
   if(t.closest('[data-request]')){ openRequest(); return; }
   const ap=t.closest('[data-approve]'); if(ap){ addEditor(ap.dataset.approve).then(()=>{ toast('已同意'); openMembers(); }).catch(err=>toast('失敗：'+(err.code||err.message))); return; }
@@ -1574,7 +1644,7 @@ function seed(){
        summary:'達魯拿到能悄悄打開他人夢境的鑰匙，進入丹德里提的夢——以為是夢，眼前先出現的卻是一個套娃。',
        link:'', content:'## 大綱\n- 達魯拿到鑰匙打算進入夢境 → 以為是夢，結果眼前先出現的是個套娃\n- 丹德知道自己是人造人，潛意識可能暴露秘密——有風險，但能用「只是夢」帶過；入侵夢境有發瘋的風險；他自己不會想到，但直接拒絕又很奇怪；鑰匙會悄悄打開別人的夢，對他來說防不勝防\n\n## 海馬迴與套娃\n俄羅斯娃娃一層層打開：人造人 → 腦中的海馬迴 → 人類胚胎 → 餐盤 → 胚胎 → 圓體 → 肉體組織\n\n> 海馬迴形似海馬；蜷曲的人魚、抱膝的胚胎，也都像海馬迴。\n\n## 意象\n- 紅色的海、藍綠色的血管／青筋\n- 海底的骨頭＝歷代死去的意識；骨頭變成的套娃（？）\n- 一顆被放進達魯腦中的蛋（驚魂夜前置？）\n\n## 參考\n靈薄獄、清醒夢、所羅門的小鑰匙'},
     ],
-    paros:[], sheets:[], comms:[], gallery:[],
+    paros:[], sheets:[], comms:[], gallery:[], locks:[],
   };
 }
 function initLocal(){
@@ -1597,6 +1667,7 @@ function initLocal(){
     login:async()=>{}, logout:async()=>{},
     requestAccess:async()=>{}, deleteRequest:async()=>{},
   };
+  wrapStore(store);
   ready=true; render();
 }
 
@@ -1609,6 +1680,27 @@ async function initFirebase(){
   const app=initializeApp(FIREBASE_CONFIG), db=F.getFirestore(app), auth=A.getAuth(app);
   mode='firebase';
   let unReq=null;
+  let pending=new Set([...COLS,'meta']);
+  const done=k=>{ pending.delete(k); if(!pending.size){ ready=true; } schedule(); };
+  // 依身分訂閱：編輯者讀全部；訪客只讀公開（locked==false）且頁面沒被鎖的資料
+  let unsubs=[], sig='', metaReady=false, authReady=false; const filled=new Set();
+  const resub=()=>{
+    if(!metaReady||!authReady) return;
+    const editor=realCanEdit(), plk=DB.meta.pageLock||{};
+    const nsig=(editor?'E':'V')+JSON.stringify(plk);
+    if(nsig===sig) return; sig=nsig;
+    unsubs.forEach(u=>u()); unsubs=[];
+    COLS.forEach(c=>{
+      let q;
+      if(c==='locks' || editor) q=F.collection(db,c);
+      else if(plk[PAGE_OF[c]]){ DB[c]=[]; done(c); return; }
+      else q=F.query(F.collection(db,c),F.where('locked','==',false));
+      unsubs.push(F.onSnapshot(q,snap=>{
+        DB[c]=snap.docs.map(d=>({...d.data(),id:d.id})); done(c);
+        if(editor && LOCKABLE.includes(c)) snap.docs.forEach(d=>{ if(typeof d.data().locked!=='boolean' && !filled.has(c+d.id)){ filled.add(c+d.id); F.updateDoc(d.ref,{locked:false}).catch(()=>{}); } });
+      },err=>{ console.error(c,err); DB[c]=[]; done(c); }));
+    });
+  };
   A.onAuthStateChanged(auth,u=>{
     user=u; myRequest=null; DB.requests=[];
     if(unReq){ unReq(); unReq=null; }
@@ -1622,12 +1714,10 @@ async function initFirebase(){
         unReq=F.onSnapshot(F.doc(db,'requests',em(u.email)),d=>{ myRequest=d.exists()?d.data():null; schedule(); },()=>{});
       }
     }
+    authReady=true; resub();
     schedule();
   });
-  let pending=new Set([...COLS,'meta']);
-  const done=k=>{ pending.delete(k); if(!pending.size){ ready=true; } schedule(); };
-  COLS.forEach(c=>F.onSnapshot(F.collection(db,c),snap=>{ DB[c]=snap.docs.map(d=>({...d.data(),id:d.id})); done(c); },err=>{ console.error(c,err); done(c); }));
-  F.onSnapshot(F.doc(db,'site','meta'),d=>{ DB.meta=d.exists()?d.data():{}; done('meta'); },err=>{ console.error(err); done('meta'); });
+  F.onSnapshot(F.doc(db,'site','meta'),d=>{ DB.meta=d.exists()?d.data():{}; metaReady=true; done('meta'); resub(); },err=>{ console.error(err); metaReady=true; done('meta'); resub(); });
   const clean=o=>JSON.parse(JSON.stringify(o));
   store={
     save:(c,o)=>F.setDoc(F.doc(db,c,o.id),clean(o)),
@@ -1638,6 +1728,7 @@ async function initFirebase(){
     requestAccess:note=>F.setDoc(F.doc(db,'requests',em(user.email)),{email:em(user.email),name:user.displayName||'',photo:user.photoURL||'',note:note||'',at:Date.now()}),
     deleteRequest:email=>F.deleteDoc(F.doc(db,'requests',em(email))),
   };
+  wrapStore(store);
 }
 
 render();
