@@ -386,6 +386,57 @@ nav.main a[data-n=""]::before{display:none}
 .lb-nav{display:flex;justify-content:space-between;align-items:center;gap:8px;border-top:1px solid var(--rule);padding-top:10px;margin-top:8px}
 .lb-nav button[disabled]{opacity:.25;cursor:default}
 @media (max-width:700px){.nav-sep{margin:10px 4px}}
+/* 委託用設定：多圖 */
+.imgs{display:flex;flex-wrap:wrap;gap:8px}
+.imgs-th{position:relative;width:84px;height:84px;border:1px solid var(--line);background:var(--paper3);overflow:hidden}
+.imgs-th img{width:100%;height:100%;object-fit:cover}
+.imgs-th button{position:absolute;top:2px;right:2px;width:20px;height:20px;border:none;background:var(--ink);color:var(--paper);cursor:pointer;font-size:13px;line-height:20px;padding:0}
+.caution{border:1px solid var(--rule);padding:8px 14px 8px;margin-top:12px;display:flex;gap:10px;align-items:flex-start}
+.caution-ic{width:14px;height:14px;flex:none;margin-top:6px}
+.caution .prose{flex:1}
+.caution h4{display:flex;align-items:center;gap:7px;margin:0 0 2px;font-family:var(--sans);font-size:13px;letter-spacing:.12em;font-weight:700}
+.caution h4 img{width:14px;height:14px}
+.caution .prose{font-size:14px;line-height:1.75}
+.sheet-intro{font-size:14.5px;line-height:1.8;color:var(--ink-dim);border-left:2px solid var(--gold-soft);padding:2px 0 2px 12px;margin:0 0 12px}
+.sheet-sub{font-family:var(--mono);font-size:11px;letter-spacing:.16em;color:var(--mute);margin:16px 0 6px;text-transform:uppercase}
+.sheet-refs{display:flex;flex-wrap:wrap;gap:8px}
+.sheet-refs img{height:110px;width:auto;border:1px solid var(--line);cursor:zoom-in}
+/* 參考圖（匯出用，畫面外排版） */
+.rs-host{position:absolute;left:-30000px;top:0;width:960px;pointer-events:none}
+.rs{width:960px;background:#F0F0F0;color:#282828;padding:40px 44px 36px;font-family:var(--serif);box-sizing:border-box}
+.rs-grid{display:grid;grid-template-columns:520px 1fr;gap:30px;margin-bottom:24px}
+.rs-row{display:block}
+.rs-row>div:empty{display:none}
+.rs-main img{width:100%;height:auto;display:block;border:1px solid #282828}
+.rs-noimg{height:520px;border:1px dashed #cfcfcf;display:flex;align-items:center;justify-content:center;font-family:var(--mono);color:#8c8c8c;letter-spacing:.2em}
+.rs-sec{margin-bottom:20px}
+.rs-h{font-family:var(--sans);font-weight:700;font-size:16px;letter-spacing:.12em;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+.rs-h span{font-family:var(--mono);font-weight:500;font-size:12px;color:#a3372e;letter-spacing:.04em}
+.rs .prose{font-size:14px;line-height:1.75}
+.rs .prose p{margin:0 0 .5em}
+.rs .prose ul{margin:0}
+.rs-dl{display:grid;grid-template-columns:auto 1fr;gap:0 16px;margin:0;font-size:14px}
+.rs-dl dt,.rs-dl dd{margin:0;padding:5px 0;border-bottom:1px solid #d9d9d9}
+.rs-dl dt{white-space:nowrap;color:#555555}
+.rs-name{font-family:var(--sans);font-weight:900;font-size:22px;letter-spacing:.08em;line-height:1.3;margin-bottom:10px}
+.rs-basic .rs-en{margin:4px 0 12px}
+.rs-stat{font-family:var(--mono);font-size:14px;letter-spacing:.08em;padding:6px 0;border-top:1px solid #282828;border-bottom:1px solid #d9d9d9}
+.rs-pv{font-size:14px;color:#555555;padding:6px 0;border-bottom:1px solid #d9d9d9}
+.rs-intro{font-size:13.5px;line-height:1.75;color:#282828;padding:8px 0 9px;border-bottom:1px solid #d9d9d9;min-height:calc(1.75em * 4 + 17px)}
+.rs-en{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:#a3372e;line-height:1.5}
+.rs-sw{display:flex;flex-wrap:wrap;gap:12px 8px}
+.rs-sw>div{width:52px;display:flex;flex-direction:column}
+.rs-sw i{display:block;width:40px;height:40px;border:1px solid #282828}
+.rs-sw b{font-weight:600;font-size:12px;padding:4px 0 0;font-family:var(--sans)}
+.rs-sw em{font-style:normal;font-family:var(--mono);font-size:10px;color:#8c8c8c;letter-spacing:.04em}
+.rs-caution{border:1px solid #282828;padding:8px 12px 6px;margin:2px 0 20px;display:flex;gap:10px;align-items:flex-start}
+.rs-warn{width:15px;height:15px;flex:none;margin-top:4px}
+.rs-caution .prose{flex:1}
+.rs-caution .rs-h{font-size:13px;margin-bottom:2px;gap:7px}
+.rs-caution .prose{font-size:13px;line-height:1.65}
+.rs-h img{width:14px;height:14px;display:block}
+.rs-refs{display:flex;flex-wrap:wrap;gap:12px}
+.rs-refs img{height:240px;width:auto;border:1px solid #282828;display:block}
 .mrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:7px 18px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;z-index:60;opacity:0;transition:.25s;pointer-events:none}
 .toast.on{opacity:1}
@@ -508,7 +559,7 @@ function imgTag(src, fallbackText, cls=''){
   if(!src) return mono;
   return `<img class="${cls}" src="${esc(src)}" alt="" loading="lazy" onerror="this.outerHTML='${mono.replace(/'/g,"\\'").replace(/"/g,'&quot;')}'">`;
 }
-function compressImage(file, max=900){
+function compressImage(file, max=900, cap=880000){
   return new Promise((res,rej)=>{
     const fr=new FileReader();
     fr.onload=()=>{ const im=new Image(); im.onload=()=>{
@@ -516,8 +567,8 @@ function compressImage(file, max=900){
       c.width=Math.round(im.width*k); c.height=Math.round(im.height*k);
       const g=c.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,c.width,c.height); g.drawImage(im,0,0,c.width,c.height);
       let q=.85, out=c.toDataURL('image/jpeg',q);
-      while(out.length>880000 && q>.45){ q-=.08; out=c.toDataURL('image/jpeg',q); }
-      if(out.length>880000){ const c2=document.createElement('canvas'); c2.width=Math.round(c.width*.75); c2.height=Math.round(c.height*.75); const g2=c2.getContext('2d'); g2.fillStyle='#fff'; g2.fillRect(0,0,c2.width,c2.height); g2.drawImage(c,0,0,c2.width,c2.height); out=c2.toDataURL('image/jpeg',.7); }
+      while(out.length>cap && q>.45){ q-=.08; out=c.toDataURL('image/jpeg',q); }
+      if(out.length>cap){ const c2=document.createElement('canvas'); c2.width=Math.round(c.width*.75); c2.height=Math.round(c.height*.75); const g2=c2.getContext('2d'); g2.fillStyle='#fff'; g2.fillRect(0,0,c2.width,c2.height); g2.drawImage(c,0,0,c2.width,c2.height); out=c2.toDataURL('image/jpeg',.7); }
       res(out); };
       im.onerror=rej; im.src=fr.result; };
     fr.onerror=rej; fr.readAsDataURL(file);
@@ -574,10 +625,15 @@ const SCHEMA = {
   sheets: { title:'委託用設定', fields:[
     {k:'name',l:'角色／項目名稱',req:1,half:1},{k:'charId',l:'對應角色',t:'charSelect',half:1},
     {k:'image',l:'參考主圖',t:'image'},
+    {k:'profile',l:'基本資料',t:'textarea',hint:'一行一項「項目：內容」。參考圖會把「身高／年齡／種族」併成一行，下一行放「職業」，例如：身高：172cm、年齡：16、種族：半精靈、職業：霍洛伊四年級生'},
+    {k:'intro',l:'角色簡介',t:'textarea',hint:'約四行，給繪師快速了解角色'},
     {k:'colors',l:'配色',t:'textarea',hint:'一行一色：「#色碼 名稱」，例如「#ad3328 瞳色」'},
     {k:'appearance',l:'外觀重點',t:'md'},
-    {k:'dos',l:'請務必',t:'md',half:1},{k:'donts',l:'請避免',t:'md',half:1},
-    {k:'refs',l:'參考圖連結',t:'textarea',hint:'一行一個網址'},
+    {k:'vibe',l:'個性／氣質',t:'md',hint:'給繪師抓表情、姿勢用'},
+    {k:'caution',l:'注意事項',t:'md',hint:'必須畫到的特徵、要避免的錯誤，都寫在這裡'},
+    {k:'refImgs',l:'參考圖（可多張）',t:'images',hint:'三視圖、服裝細節、小物等；會一起放進匯出的參考圖'},
+    {k:'refs',l:'參考圖連結',t:'textarea',hint:'一行一個網址（只會以連結顯示）'},
+    {k:'notes',l:'其他備註',t:'md'},
     {k:'order',l:'排序',t:'number'},
   ]},
   gallery: { title:'畫冊作品', fields:[
@@ -636,6 +692,7 @@ function fieldHTML(f, v){
       const list=DB.chars.slice().sort(byOrder);
       input = list.length ? `<div class="checks" id="${id}">${list.map(c=>`<label><input type="checkbox" value="${c.id}" ${sel.has(c.id)?'checked':''}>${esc(c.name)}${c.scope&&c.scope!=='main'?`<span class="muted small">・${esc(scopeName(c.scope))}</span>`:''}</label>`).join('')}</div>` : `<div class="muted small">還沒有角色</div>`;
       break; }
+    case 'images': input=`<div class="imgs" id="${id}" data-imgs="${f.k}"></div><label class="btn sm" style="margin:6px 0 0">＋ 上傳圖片<input type="file" accept="image/*" multiple hidden data-upmany="${f.k}"></label>`; break;
     case 'image': input=`<div class="img-row"><input type="text" id="${id}" value="${esc(String(val).startsWith('data:')?'':val)}" data-data="${String(val).startsWith('data:')?'1':''}" placeholder="${String(val).startsWith('data:')?'（已上傳圖片）':'貼上圖片網址，或按右邊上傳'}"><label class="btn sm" style="margin:0">上傳<input type="file" accept="image/*" hidden data-up="${id}"></label>${val?`<button type="button" class="btn sm ghost" data-clr="${id}">清除</button>`:''}</div><div class="hint">上傳的圖會自動縮小後存進資料庫</div>`; break;
     default: input=`<input type="text" id="${id}" value="${esc(val)}">`;
   }
@@ -653,6 +710,7 @@ function openEditor(col, item, preset={}){
   }
   if(isNew && col==='stories' && !obj.date) obj.date=today();
   if(isNew && (col==='comms'||col==='gallery') && !obj.date) obj.date=today();
+  if(col==='sheets' && !obj.caution && (obj.dos||obj.donts)) obj.caution=[obj.dos,obj.donts].filter(Boolean).join('\n');
   if(isNew && col==='paros' && (obj.order===undefined||obj.order==='')) obj.order=DB.paros.reduce((mx,p)=>Math.max(mx,Number(p.order)||0),0)+1;
   if(isNew && !obj.scope && sch.fields.some(f=>f.t==='scope')) obj.scope='main';
   const imgData={};
@@ -665,6 +723,17 @@ function openEditor(col, item, preset={}){
   const m=openModal(`<h2>${isNew?'新增':'編輯'}${sch.title}</h2><form id="edForm">${html}
     <div class="modal-foot"><div>${!isNew?'<button type="button" class="btn danger" data-del>刪除</button>':''}</div>
     <div><button type="button" class="btn ghost" data-cancel>取消</button> <button class="btn pri" type="submit">儲存</button></div></div></form>`);
+  const imgsData={};
+  sch.fields.filter(f=>f.t==='images').forEach(f=>{ imgsData[f.k]=Array.isArray(obj[f.k])?obj[f.k].slice():[]; });
+  const drawImgs=k=>{ const box=m.querySelector(`[data-imgs="${k}"]`); if(!box) return;
+    box.innerHTML=imgsData[k].map((u,i)=>`<span class="imgs-th"><img src="${esc(u)}" alt=""><button type="button" data-rmimg="${k}:${i}" title="移除">×</button></span>`).join('') || '<span class="muted small">還沒有圖片</span>'; };
+  Object.keys(imgsData).forEach(drawImgs);
+  m.addEventListener('click',e=>{ const b=e.target.closest('[data-rmimg]'); if(!b) return; const [k,i]=b.dataset.rmimg.split(':'); imgsData[k].splice(Number(i),1); drawImgs(k); });
+  m.querySelectorAll('[data-upmany]').forEach(inp=>inp.addEventListener('change',async()=>{
+    const k=inp.dataset.upmany;
+    for(const file of inp.files){ try{ imgsData[k].push(await compressImage(file,1000,300000)); }catch{ toast('有圖片讀取失敗'); } }
+    inp.value=''; drawImgs(k); toast('圖片已載入');
+  }));
   m.querySelectorAll('[data-jsonup]').forEach(inp=>inp.addEventListener('change',()=>{
     const f=inp.files[0]; if(!f) return; const r=new FileReader();
     r.onload=()=>{ m.querySelector('#'+inp.dataset.jsonup).value=r.result; toast('已載入 '+f.name); }; r.readAsText(f);
@@ -684,11 +753,14 @@ function openEditor(col, item, preset={}){
       if(f.t==='json'){ const v=el.value.trim(); if(!v){ obj[f.k]=null; continue; }
         try{ const j=JSON.parse(v); if(!Array.isArray(j.items)) throw 0; obj[f.k]=j; }catch{ toast('噗文 JSON 格式不正確'); return; } continue; }
       if(f.t==='chars'){ obj[f.k]= el? [...el.querySelectorAll('input:checked')].map(x=>x.value) : []; continue; }
+      if(f.t==='images'){ obj[f.k]=imgsData[f.k]||[]; continue; }
       if(f.t==='image'){ const typed=el.value.trim(); obj[f.k]= typed || (imgData[f.k]===null? '' : (imgData[f.k]||'')); continue; }
       if(!el) continue;
       obj[f.k]= f.t==='number' ? (el.value===''?'':Number(el.value)) : el.value;
     }
     const miss=sch.fields.find(f=>f.req && !String(obj[f.k]||'').trim());
+    if(col==='sheets'){ delete obj.dos; delete obj.donts; }
+    if(JSON.stringify(obj).length>990000){ toast('圖片總量超過資料庫單筆上限（約 1MB），請減少幾張參考圖'); return; }
     if(miss){ toast(`請填寫「${miss.l}」`); return; }
     if(col==='events'){ const cf=tlConf(obj.scope||'main'); if((obj.ageB===''||obj.ageB==null) && obj.ageA!=='' && obj.ageA!=null && cf.gap!=='' && cf.gap!=null) obj.ageB=Number(obj.ageA)+Number(cf.gap); }
     obj.updatedAt=Date.now(); obj.updatedBy= user?.displayName || user?.email || '';
@@ -1084,6 +1156,79 @@ function viewParo(id){
 }
 
 /* ----- 委託 ----- */
+/* 黑色實心警告符號 */
+const WARN_SVG = (()=>{ try{ const c=document.createElement('canvas'); c.width=c.height=96; const g=c.getContext('2d');
+  g.fillStyle='#282828'; g.beginPath(); g.moveTo(48,6); g.lineTo(93,88); g.lineTo(3,88); g.closePath(); g.fill();
+  g.globalCompositeOperation='destination-out'; g.beginPath(); if(g.roundRect) g.roundRect(43.5,32,9,30,2.5); else g.rect(43.5,32,9,30); g.fill();
+  g.beginPath(); g.arc(48,73,5.4,0,Math.PI*2); g.fill(); return c.toDataURL('image/png'); }catch{ return ''; } })();
+const cautionOf = s => s.caution || [s.dos,s.donts].filter(Boolean).join('\n');
+/* ----- 委託參考圖匯出 ----- */
+let _h2c=null;
+function loadH2C(){
+  if(window.html2canvas) return Promise.resolve(window.html2canvas);
+  return _h2c || (_h2c=new Promise((res,rej)=>{ const sc=document.createElement('script');
+    sc.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+    sc.onload=()=>res(window.html2canvas); sc.onerror=()=>{ _h2c=null; rej(new Error('html2canvas 載入失敗')); }; document.head.appendChild(sc); }));
+}
+function refSheetHTML(s){
+  const cols=lines(s.colors).map(l=>{ const m=l.match(/(#[0-9a-fA-F]{3,8})\s*(.*)/); return m?[m[1],m[2]]:null; }).filter(Boolean);
+  const prof=lines(s.profile).map(l=>{ const i=l.search(/[:：]/); return i>0?[l.slice(0,i),l.slice(i+1)]:['',l]; });
+  const c=s.charId && DB.chars.find(x=>x.id===s.charId);
+  const d=new Date(); const ds=`${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+  const sec=(n,t,body)=>`<div class="rs-sec"><div class="rs-h">${t}</div>${body}</div>`;
+  let n=0; const no=()=>String(++n).padStart(2,'0');
+  const pick=re=>{ const i=prof.findIndex(([k])=>re.test(k)); return i<0?null:prof.splice(i,1)[0][1].trim(); };
+  const ht=pick(/身高|height/i), ag=pick(/年齡|歲數|age/i), rc=pick(/種族|血統|race/i), job=pick(/職業|身分|身份|occupation|job/i);
+  const agTxt=ag? (/^\d+$/.test(ag)? ag+'y' : ag) : '';
+  const statLine=[ht,agTxt,rc].filter(Boolean).join(' / ');
+  const restProf=prof.map(([k,v])=>v.trim()).filter(Boolean);
+  return `<div class="rs">
+    <div class="rs-grid">
+      <div class="rs-main">${s.image?`<img src="${esc(s.image)}" alt="">`:'<div class="rs-noimg">NO IMAGE</div>'}</div>
+      <div class="rs-info">
+        <div class="rs-row">
+          <div class="rs-sec rs-basic">
+            <div class="rs-name">${esc(s.name)}</div>
+            ${statLine?`<div class="rs-stat">${esc(statLine)}</div>`:''}
+            ${job?`<div class="rs-pv">${esc(job)}</div>`:''}
+            ${s.intro?`<div class="rs-intro">${esc(s.intro).replace(/\n/g,'<br>')}</div>`:''}
+            ${restProf.map(v=>`<div class="rs-pv">${esc(v)}</div>`).join('')}
+          </div>
+          ${cols.length?`<div class="rs-sec"><div class="rs-sw">${cols.map(([h,nm])=>`<div><i style="background:${esc(h)}"></i><b>${esc(nm||'—')}</b><em>${esc(h.toUpperCase())}</em></div>`).join('')}</div></div>`:'<div></div>'}
+        </div>
+        ${(s.appearance||s.vibe)?`<div class="rs-row">
+          ${s.appearance?sec(no(),'外觀',`<div class="prose">${md(s.appearance)}</div>`):'<div></div>'}
+          ${s.vibe?sec(no(),'個性 / 氣質',`<div class="prose">${md(s.vibe)}</div>`):'<div></div>'}
+        </div>`:''}
+        ${cautionOf(s)?`<div class="rs-caution"><img class="rs-warn" src="${WARN_SVG}" alt=""><div class="prose">${md(cautionOf(s))}</div></div>`:''}
+        ${s.notes?sec(no(),'其他備註',`<div class="prose">${md(s.notes)}</div>`):''}
+      </div>
+    </div>
+    ${(s.refImgs||[]).length?`<div class="rs-sec"><div class="rs-h">參考圖</div><div class="rs-refs">${s.refImgs.map(u=>`<img src="${esc(u)}" alt="">`).join('')}</div></div>`:''}
+  </div>`;
+}
+async function exportRefSheet(id){
+  const s=DB.sheets.find(x=>x.id===id); if(!s) return;
+  const m=openModal(`<h2>匯出參考圖</h2><div class="muted small" id="rsStatus">正在產生圖片…</div>`,'sm');
+  const host=document.createElement('div'); host.className='rs-host'; host.innerHTML=refSheetHTML(s); document.body.appendChild(host);
+  try{
+    const h2c=await loadH2C();
+    await Promise.all([...host.querySelectorAll('img')].map(im=>im.complete?0:new Promise(r=>{ im.onload=im.onerror=r; })));
+    try{ await document.fonts.ready; }catch{}
+    const canvas=await h2c(host.firstElementChild,{scale:2,backgroundColor:'#F0F0F0',useCORS:true,logging:false});
+    const url=canvas.toDataURL('image/png');
+    const fname=`${s.name}-委託參考-${today()}.png`;
+    const m2=openModal(`<h2>參考圖・${esc(s.name)}</h2>
+      <div class="lb-img" style="max-height:66vh;overflow:auto"><img src="${url}" alt="" style="max-height:none;width:100%"></div>
+      <div class="hint small muted" style="margin-top:8px">按「下載 PNG」存檔；手機也可以長按圖片儲存。用網址插入的圖片如果沒出現，是對方網站不允許跨站讀取，改用上傳即可。</div>
+      <div class="modal-foot"><span class="mono small muted">${canvas.width} × ${canvas.height}px</span><div><button class="btn ghost" data-x>關閉</button> <a class="btn pri" id="rsDl" href="${url}" download="${esc(fname)}">⇩ 下載 PNG</a></div></div>`,'wide');
+    m2.querySelector('[data-x]').onclick=closeModal;
+  }catch(err){
+    console.error(err);
+    const st=document.getElementById('rsStatus'); if(st) st.textContent='產生失敗：'+(err.message||err)+'（請確認網路可以連到 cdnjs）';
+  }finally{ host.remove(); }
+}
+
 /* ----- 畫冊 ----- */
 function viewGallery(){
   const all=DB.gallery.slice().sort(byDateDesc);
@@ -1134,10 +1279,16 @@ function viewComm(){
        return `<div class="card"><div class="top-right">${editBtn('sheets',s.id)}</div>
         <div class="sheet"><div><div class="portrait" style="border-radius:var(--r)">${imgTag(s.image,s.name)}</div></div>
         <div><h3 style="font-size:22px">${esc(s.name)}</h3>${s.charId&&charName(s.charId)?`<a class="small" data-go="char-${s.charId}">角色頁 →</a>`:''}
+          ${lines(s.profile).length?`<dl class="fields" style="font-size:14.5px;margin:12px 0">${lines(s.profile).map(l=>{ const i=l.search(/[:：]/); return i>0?`<dt>${esc(l.slice(0,i))}</dt><dd>${esc(l.slice(i+1))}</dd>`:`<dt></dt><dd>${esc(l)}</dd>`; }).join('')}</dl>`:''}
+          ${s.intro?`<div class="sheet-intro">${esc(s.intro).replace(/\n/g,'<br>')}</div>`:''}
           ${cols.length?`<div class="swatches">${cols.map(([h,n])=>`<span class="sw" data-copy="${esc(h)}"><i style="background:${esc(h)}"></i><b>${esc(n||'—')}</b><em>${esc(h.toUpperCase())}</em></span>`).join('')}</div>`:''}
           ${s.appearance?`<div class="prose" style="font-size:15px">${md(s.appearance)}</div>`:''}
-          ${(s.dos||s.donts)?`<div class="dodont"><div><h4 style="color:var(--vein)">請務必</h4><div class="prose">${md(s.dos)}</div></div><div><h4 style="color:var(--sea-soft)">請避免</h4><div class="prose">${md(s.donts)}</div></div></div>`:''}
-          ${refs.length?`<div style="margin-top:12px" class="small">參考圖：${refs.map((r,i)=>`<a href="${esc(r)}" target="_blank" rel="noopener" class="chip">參考 ${i+1} ↗</a>`).join('')}</div>`:''}
+          ${cautionOf(s)?`<div class="caution"><img class="caution-ic" src="${WARN_SVG}" alt="注意"><div class="prose">${md(cautionOf(s))}</div></div>`:''}
+          ${s.vibe?`<div class="sheet-sub">個性 / 氣質</div><div class="prose" style="font-size:15px">${md(s.vibe)}</div>`:''}
+          ${(s.refImgs||[]).length?`<div class="sheet-sub">參考圖</div><div class="sheet-refs">${s.refImgs.map((u,i)=>`<img src="${esc(u)}" alt="" data-refimg="${s.id}:${i}">`).join('')}</div>`:''}
+          ${refs.length?`<div style="margin-top:12px" class="small">參考連結：${refs.map((r,i)=>`<a href="${esc(r)}" target="_blank" rel="noopener" class="chip">參考 ${i+1} ↗</a>`).join('')}</div>`:''}
+          ${s.notes?`<div class="sheet-sub">其他備註</div><div class="prose" style="font-size:14.5px">${md(s.notes)}</div>`:''}
+          <div style="margin-top:16px"><button class="btn" data-refsheet="${s.id}">⇩ 匯出參考圖</button></div>
         </div></div></div>`; }).join('')}</div>` : emptyBox('還沒有委託用設定'));
   }
   const cs=DB.comms.slice().sort(byDateDesc);
@@ -1340,6 +1491,8 @@ document.addEventListener('click',e=>{
   const tab=t.closest('.tabs[data-scope] button'); if(tab){ const sc=tab.parentElement.dataset.scope; ui.tab[sc]=tab.dataset.tab; tab.parentElement.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b===tab)); $('#scopeBody').innerHTML=scopeBody(sc,tab.dataset.tab); return; }
   if(t.closest('[data-paro-list]')){ openParoList(); return; }
   const pl=t.closest('[data-pklang]'); if(pl){ ui.pkLang=pl.dataset.pklang; const y=window.scrollY; render(); window.scrollTo({top:y}); return; }
+  const rsb=t.closest('[data-refsheet]'); if(rsb){ exportRefSheet(rsb.dataset.refsheet); return; }
+  const ri=t.closest('[data-refimg]'); if(ri){ const [sid,i]=ri.dataset.refimg.split(':'); const sh=DB.sheets.find(x=>x.id===sid); if(sh){ const mm=openModal(`<div class="lb-img"><img src="${esc(sh.refImgs[Number(i)])}" alt=""></div><div class="modal-foot"><span></span><button class="btn ghost" data-x>關閉</button></div>`,'wide'); mm.querySelector('[data-x]').onclick=closeModal; } return; }
   const gi=t.closest('[data-gal]'); if(gi){ openGalleryItem(gi.dataset.gal); return; }
   const gc=t.closest('[data-galchar]'); if(gc){ ui.galChar=gc.dataset.galchar; render(); return; }
   const ct=t.closest('[data-ct]'); if(ct){ ui.commTab=ct.dataset.ct; render(); return; }
