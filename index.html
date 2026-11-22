@@ -555,6 +555,10 @@ svg.lk{width:1em;height:1em;vertical-align:-.12em;flex:none}
 .rs-fit{position:relative;overflow:hidden;width:100%;max-width:620px}
 .rs-fit>.rs{transform-origin:0 0;position:absolute;left:0;top:0}
 .lockbox.lb-sheet{min-height:420px}
+.img-prev{margin-top:8px;line-height:0}
+.img-prev img{max-height:180px;max-width:100%;border:1px solid var(--line);background:repeating-conic-gradient(#d6d6d6 0 25%,#fff 0 50%) 0 0/14px 14px}
+.img-acts{display:flex;align-items:center;gap:10px;margin-top:6px;flex-wrap:wrap}
+.img-acts[hidden]{display:none}
 .mrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:7px 18px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;z-index:60;opacity:0;transition:.25s;pointer-events:none}
 .toast.on{opacity:1}
@@ -621,7 +625,7 @@ const ui = { tab:{}, storyQ:'', storyScope:'', storyType:'', commTab:'sheets' };
 const $ = s => document.querySelector(s);
 const uid = () => Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-3);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const today = () => new Date().toISOString().slice(0,10);
+const today = () => { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
 const byOrder = (a,b) => (Number(a.order)||999) - (Number(b.order)||999) || String(a.name||a.title||'').localeCompare(String(b.name||b.title||''),'zh-Hant');
 const bySort = (a,b) => String(a.sort||'').localeCompare(String(b.sort||''),undefined,{numeric:true}) || String(a.when||'').localeCompare(String(b.when||''));
 const byDateDesc = (a,b) => String(b.date||'').localeCompare(String(a.date||''));
@@ -711,6 +715,24 @@ function imgTag(src, fallbackText, cls=''){
   const mono = `<span class="ph">${esc((fallbackText||'◦').trim().slice(0,1))}</span>`;
   if(!src) return mono;
   return `<img class="${cls}" src="${esc(src)}" alt="" loading="lazy" onerror="this.outerHTML='${mono.replace(/'/g,"\\'").replace(/"/g,'&quot;')}'">`;
+}
+/* 從圖片外圍把連著的白色／近白色變透明（保留角色內部的白色） */
+function removeWhiteBg(src, cap=880000){
+  return new Promise((res,rej)=>{ const im=new Image(); im.onload=()=>{
+    const W=im.naturalWidth, H=im.naturalHeight, c=document.createElement('canvas'); c.width=W; c.height=H;
+    const g=c.getContext('2d'); g.drawImage(im,0,0); const id=g.getImageData(0,0,W,H), d=id.data;
+    const HARD=238, SOFT=205, seen=new Uint8Array(W*H), q=new Int32Array(W*H); let qh=0, qt=0;
+    const lum=i=>Math.min(d[i],d[i+1],d[i+2]);
+    const push=p=>{ if(!seen[p]){ const i=p*4; if(d[i+3]===0 || lum(i)>=SOFT){ seen[p]=1; q[qt++]=p; } } };
+    for(let x=0;x<W;x++){ push(x); push((H-1)*W+x); } for(let y=0;y<H;y++){ push(y*W); push(y*W+W-1); }
+    while(qh<qt){ const p=q[qh++], i=p*4, L=lum(i);
+      if(L>=HARD) d[i+3]=0; else { d[i+3]=Math.min(d[i+3], Math.round(255*(HARD-L)/(HARD-SOFT))); continue; }
+      const x=p%W, y=(p-x)/W; if(x>0)push(p-1); if(x<W-1)push(p+1); if(y>0)push(p-W); if(y<H-1)push(p+W); }
+    g.putImageData(id,0,0);
+    let out=c.toDataURL('image/png'), sc=1;
+    while(out.length>cap && sc>.25){ sc*=.8; const c2=document.createElement('canvas'); c2.width=Math.round(W*sc); c2.height=Math.round(H*sc); c2.getContext('2d').drawImage(c,0,0,c2.width,c2.height);
+      const pn=c2.toDataURL('image/png'), wb=c2.toDataURL('image/webp',.85); out=(wb.startsWith('data:image/webp')&&wb.length<pn.length)?wb:pn; }
+    res(out); }; im.onerror=rej; im.src=src; });
 }
 function compressImage(file, max=900, cap=880000){
   return new Promise((res,rej)=>{
@@ -812,7 +834,8 @@ const SCHEMA = {
     {k:'order',l:'排序',t:'number'},
   ]},
   notes: { title:'筆記', fields:[
-    {k:'scope',l:'屬於哪裡的設定',t:'scope',half:1},{k:'title',l:'標題（可留空）',half:1},
+    {k:'scope',l:'屬於哪裡的設定',t:'scope',half:1},{k:'date',l:'筆記日期',t:'date',half:1},
+    {k:'title',l:'標題（可留空）'},
     {k:'text',l:'內容',t:'md',req:1,tall:1},
   ]},
   gallery: { title:'畫冊作品', fields:[
@@ -882,7 +905,7 @@ function fieldHTML(f, v){
       input=`<div class="kv" id="${id}">${rows.map(row).join('')}</div><button type="button" class="btn sm" data-kvadd="${id}" style="margin-top:6px">＋ 新增欄位</button>`;
       break; }
     case 'images': input=`<div class="imgs" id="${id}" data-imgs="${f.k}"></div><label class="btn sm" style="margin:6px 0 0">＋ 上傳圖片<input type="file" accept="image/*" multiple hidden data-upmany="${f.k}"></label>`; break;
-    case 'image': input=`<div class="img-row"><input type="text" id="${id}" value="${esc(String(val).startsWith('data:')?'':val)}" data-data="${String(val).startsWith('data:')?'1':''}" placeholder="${String(val).startsWith('data:')?'（已上傳圖片）':'貼上圖片網址，或按右邊上傳'}"><label class="btn sm" style="margin:0">上傳<input type="file" accept="image/*" hidden data-up="${id}"></label>${val?`<button type="button" class="btn sm ghost" data-clr="${id}">清除</button>`:''}</div><div class="hint">上傳的圖會自動縮小後存進資料庫</div>`; break;
+    case 'image': input=`<div class="img-row"><input type="text" id="${id}" value="${esc(String(val).startsWith('data:')?'':val)}" data-data="${String(val).startsWith('data:')?'1':''}" placeholder="${String(val).startsWith('data:')?'（已上傳圖片）':'貼上圖片網址，或按右邊上傳'}"><label class="btn sm" style="margin:0">上傳<input type="file" accept="image/*" hidden data-up="${id}"></label>${val?`<button type="button" class="btn sm ghost" data-clr="${id}">清除</button>`:''}</div><div class="img-prev" data-prev="${id}">${String(val).startsWith('data:')?`<img src="${esc(val)}" alt="">`:''}</div><div class="img-acts" data-acts="${id}" ${String(val).startsWith('data:')?'':'hidden'}><button type="button" class="btn sm" data-dewhite="${id}">去除白底</button><span class="hint">格子底＝透明。原圖若本身是白底（不是真正的透明檔），按這個把外圍白色變透明</span></div><div class="hint">上傳的圖會自動縮小後存進資料庫</div>`; break;
     default: input=`<input type="text" id="${id}" value="${esc(val)}">`;
   }
   return `<div class="f" ${f.half?'data-half':''}>${lab}${input}${hint}</div>`;
@@ -899,7 +922,7 @@ function openEditor(col, item, preset={}){
   }
   if(isNew && col==='stories' && !obj.date) obj.date=today();
   if(isNew && (col==='comms'||col==='gallery') && !obj.date) obj.date=today();
-  if(isNew && col==='notes'){ obj.createdAt=Date.now(); obj.author=user?.displayName||user?.email||''; }
+  if(isNew && col==='notes'){ if(!obj.date) obj.date=today(); obj.createdAt=Date.now(); obj.author=user?.displayName||user?.email||''; }
   if(col==='sheets' && !obj.caution && (obj.dos||obj.donts)) obj.caution=[obj.dos,obj.donts].filter(Boolean).join('\n');
   if(isNew && col==='paros' && (obj.order===undefined||obj.order==='')) obj.order=DB.paros.reduce((mx,p)=>Math.max(mx,Number(p.order)||0),0)+1;
   if(isNew && !obj.scope && sch.fields.some(f=>f.t==='scope')) obj.scope='main';
@@ -936,9 +959,13 @@ function openEditor(col, item, preset={}){
   }));
   m.querySelectorAll('[data-up]').forEach(inp=>inp.addEventListener('change',async()=>{
     const file=inp.files[0]; if(!file) return; const k=inp.dataset.up.slice(2);
-    try{ imgData[k]=await compressImage(file, col==='gallery'?1600:900); const t=m.querySelector('#'+inp.dataset.up); t.value=''; t.placeholder='（已上傳圖片）'; toast('圖片已載入'); }catch{ toast('圖片讀取失敗'); }
+    try{ imgData[k]=await compressImage(file, col==='gallery'?1600:900); const t=m.querySelector('#'+inp.dataset.up); t.value=''; t.placeholder='（已上傳圖片）'; toast('圖片已載入'); showPrev(inp.dataset.up); }catch{ toast('圖片讀取失敗'); }
   }));
-  m.querySelectorAll('[data-clr]').forEach(b=>b.addEventListener('click',()=>{ const k=b.dataset.clr.slice(2); delete imgData[k]; const t=m.querySelector('#'+b.dataset.clr); t.value=''; t.placeholder='貼上圖片網址，或按右邊上傳'; imgData[k]=null; }));
+  const showPrev=id=>{ const k=id.slice(2), box=m.querySelector(`[data-prev="${id}"]`), acts=m.querySelector(`[data-acts="${id}"]`); if(!box) return;
+    const u=imgData[k]; box.innerHTML=u?`<img src="${u}" alt="">`:''; if(acts) acts.hidden=!u; };
+  m.querySelectorAll('[data-dewhite]').forEach(b=>b.addEventListener('click',async()=>{ const id=b.dataset.dewhite, k=id.slice(2); if(!imgData[k]) return;
+    b.disabled=true; b.textContent='處理中…'; try{ imgData[k]=await removeWhiteBg(imgData[k]); showPrev(id); toast('已去除白底'); }catch(e){ console.error(e); toast('處理失敗'); } b.disabled=false; b.textContent='去除白底'; }));
+  m.querySelectorAll('[data-clr]').forEach(b=>b.addEventListener('click',()=>{ const k=b.dataset.clr.slice(2); setTimeout(()=>showPrev(b.dataset.clr)); delete imgData[k]; const t=m.querySelector('#'+b.dataset.clr); t.value=''; t.placeholder='貼上圖片網址，或按右邊上傳'; imgData[k]=null; }));
   m.querySelector('[data-cancel]').onclick=closeModal;
   const del=m.querySelector('[data-del]');
   if(del) del.onclick=async()=>{ if(await askConfirm(`確定刪除「${obj.name||obj.title}」？`)){ await store.remove(col,obj.id); toast('已刪除'); if(['chars','paros','stories'].includes(col)) go(col==='chars'?'lore':col==='paros'?'paro':'stories'); } else openEditor(col,item,preset); };
@@ -1454,13 +1481,15 @@ async function exportRefSheet(id){
 }
 
 /* ----- 筆記（僅編輯者） ----- */
-const noteTime = n => { const d=new Date(n.updatedAt||n.createdAt||0); return d.getTime()? `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}` : ''; };
+const ymd = t => { const d=new Date(t||0); return d.getTime()? `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` : ''; };
+const noteKey = n => n.date || ymd(n.createdAt||n.updatedAt);
+const noteTime = n => { const v=noteKey(n); return /^\d{4}-\d{2}-\d{2}$/.test(v)? v.replace(/-/g,'.') : v; };
 function notesList(list, showScope){
-  list=list.slice().sort((a,b)=>(b.updatedAt||b.createdAt||0)-(a.updatedAt||a.createdAt||0));
+  list=list.slice().sort((a,b)=>String(noteKey(b)).localeCompare(String(noteKey(a)),undefined,{numeric:true}) || (b.updatedAt||b.createdAt||0)-(a.updatedAt||a.createdAt||0));
   if(!list.length) return emptyBox('還沒有筆記');
   return `<div class="notes">${list.map(n=>`
     <article class="note" data-edit="notes:${n.id}">
-      <div class="note-meta">${showScope?`<span class="chip ${n.scope&&n.scope!=='main'?'vein':''}">${esc(scopeName(n.scope))}</span>`:''}<span>${esc(noteTime(n))}</span>${n.updatedBy||n.author?`<span>${esc(n.updatedBy||n.author)}</span>`:''}</div>
+      <div class="note-meta"><span>${esc(noteTime(n))}</span></div>
       ${n.title?`<h3>${esc(n.title)}</h3>`:''}
       <div class="prose">${md(n.text)}</div>
     </article>`).join('')}</div>`;
